@@ -6,6 +6,7 @@ from flask import redirect
 from flask import render_template
 from flask import session
 from flask import url_for
+from flask_migrate import Migrate, MigrateCommand
 from flask_script import Shell
 from flask_script import Manager
 from flask_bootstrap import Bootstrap
@@ -19,6 +20,8 @@ app.config['SECRET_KEY'] = 'hard to guess'
 bootstrap = Bootstrap(app)
 db = SQLAlchemy(app)
 manager = Manager(app)
+migrate = Migrate(app, db)
+manager.add_command('db', MigrateCommand)
 
 app.config['SQLALCHEMY_DATABASE_URI'] =\
     'mysql+pymysql://flask:sadsad@localhost:3306/flask_blog'
