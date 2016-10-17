@@ -3,9 +3,10 @@ from flask import redirect
 from flask import render_template
 from flask import request
 from flask import url_for
-from flask_login import login_required, login_user, logout_user
+from flask_login import login_required, login_user, logout_user, current_user
 
-from app.auth.forms import LoginForm, RegistrationForm
+from app import db
+from app.auth.forms import LoginForm, RegistrationForm, ChangePasswordForm
 from app.models import User
 from . import auth
 
@@ -36,3 +37,18 @@ def reg():
 @login_required
 def secret():
     return 'okay, u logined.'
+
+@auth.route('/change_password', methods=['GET' ,'POST'])
+@login_required
+def change_password():
+    form = ChangePasswordForm()
+    if form.validate_on_submit():
+        if current_user.verify_password(form.previous_password.data):
+            current_user.password = form.password.data
+            db.session.add(current_user)
+            flash('your password has been updated')
+            return redirect(url_for('main.index'))
+        else:
+            flash('previous password is not matched')
+    return render_template('auth/change_password.html', form=form)
+
