@@ -4,14 +4,22 @@ from flask import render_template
 from flask import session
 from flask import url_for
 
+from app import db
+from app.models import Post
 from . import main
 from datetime import datetime as dt
-from .forms import LoginForm
+from .forms import LoginForm, PostForm
 
 
-@main.route('/')
+@main.route('/', methods=['GET', 'POST'])
 def index():
-    return render_template('base.html')
+    form = PostForm()
+    if form.validate_on_submit():
+        post = Post(body=form.body.data,author_id=1)
+        db.session.add(post)
+        return redirect(url_for('.index'))
+    posts = Post.query.order_by(Post.timestamp.desc()).all()
+    return render_template('index.html', form=form, posts=posts)
 @main.route('/hello')
 def hello_world():
     time = dt.now()

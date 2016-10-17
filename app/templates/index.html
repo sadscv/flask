@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Sad{% endblock %}
+{% block page_content %}
+<div class="page-header">
+    <h1>Hello,sad</h1>
+</div>
+<div>
+    {{ wtf.quick_form(form) }}
+</div>
+<ul>
+    {% for post in posts %}
+        <li class="post">
+            <div class="post-data">{{ moment(post.timestamp).fromNow() }}</div>
+            <div class="post-body">{{ post.body }}</div>
+        </li>
+    {% endfor %}
+{% endblock %}
