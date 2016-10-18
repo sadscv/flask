@@ -3,9 +3,11 @@ from flask import redirect
 from flask import render_template
 from flask import session
 from flask import url_for
+from flask.ext.login import login_required
 
 from app import db
-from app.models import Post
+from app.decorator import admin_required, permission_required
+from app.models import Post, Permission
 from . import main
 from datetime import datetime as dt
 from .forms import LoginForm, PostForm
@@ -35,3 +37,16 @@ def login():
         session['name'] = form.username.data
         return redirect(url_for('.hello_world'))
     return  render_template('login.html', form=form)
+
+@main.route('/admin')
+@login_required
+@admin_required
+def for_admin_only():
+    return 'for admin'
+
+@main.route('/moderator')
+@login_required
+@permission_required(Permission.MODERATE_COMMENTS)
+def for_moderator_only():
+    return 'for comment moderator'
+
