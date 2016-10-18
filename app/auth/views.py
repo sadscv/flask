@@ -21,6 +21,7 @@ def login():
         flash('Invalid username or password')
     return render_template('auth/login.html', form=form)
 
+
 @auth.route('/logout')
 @login_required
 def logout():
@@ -28,15 +29,24 @@ def logout():
     flash('you have been logged out')
     return redirect(url_for('main.index'))
 
-@auth.route('/reg')
+
+@auth.route('/reg', methods=['GET', 'POST'])
 def reg():
     form = RegistrationForm()
+    if form.validate_on_submit():
+        user = User(email=form.email.data,
+                    username=form.username.data,
+                    password=form.password.data)
+        db.session.add(user)
+        return redirect(url_for('main.index'))
     return render_template('auth/register.html', form=form)
+
 
 @auth.route('/secret')
 @login_required
 def secret():
     return 'okay, u logined.'
+
 
 @auth.route('/change_password', methods=['GET' ,'POST'])
 @login_required
@@ -52,3 +62,18 @@ def change_password():
             flash('previous password is not matched')
     return render_template('auth/change_password.html', form=form)
 
+
+@auth.route('/unconfirmed')
+def unconfirmed():
+    if current_user.is_anonymous:
+        return redirect(url_for('main.index'))
+    return redirect(url_for('main.index'))
+    # return render_template('auth/unconfirmed.html')
+
+
+@auth.before_app_request
+def before_request():
+    if current_user.is_authenticated:
+        current_user.ping()
+        # if request.endpoint[:5] != 'auth.':
+        #     return render_template(url_for('auth.unconfirmed'))
