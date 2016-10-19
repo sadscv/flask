@@ -14,12 +14,12 @@ class LoginForm(Form):
 class RegistrationForm(Form):
     email = StringField('Email', validators=[DataRequired(), Length(1, 64), Email()])
     username = StringField('username', validators=[
-        DataRequired, Length(1,64), Regexp('^[A-Za-z][A-Za-z0-9_.]*$', 0,
+        DataRequired(), Length(1,64), Regexp('^[A-Za-z][A-Za-z0-9_.]*$', 0,
                                             'Usernames must have only letters, '
                                             'numbers, dots or underscores')])
     password = PasswordField('Password', validators=[
         DataRequired(), EqualTo('password2', message='Passwords not matched')])
-    password2 = PasswordField('Password', validators=[DataRequired()])
+    password2 = PasswordField('Retype Password', validators=[DataRequired()])
     submit = SubmitField('Register')
 
     def validate_email(self, field):
