@@ -4,6 +4,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 class Config:
     SECRET_KEY = 'hard to guess'
     FLASK_ADMIN = 'sadscv@hotmail.com'
+    FLASK_POST_PER_PAGE = 10
     SQLALCHEMY_COMMIT_ON_TEARDOWN = True
 
     @staticmethod

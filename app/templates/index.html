@@ -1,19 +1,20 @@
 {% extends "base.html" %}
 {% import "bootstrap/wtf.html" as wtf %}
-
+{% import "_macros.html" as macros %}
 {% block title %}Sad{% endblock %}
+
 {% block page_content %}
 <div class="page-header">
-    <h1>Hello,{{ current_user.username }}</h1>
+    <h1>Hello,{% if current_user.is_authenticated %}{{ current_user.username }}{% else %}Stranger{% endif %}</h1>
 </div>
 <div>
-    {{ wtf.quick_form(form) }}
+    {% if current_user.can(Permission.WRITE_ARTICLES) %}
+        {{ wtf.quick_form(form) }}
+    {% endif %}
 </div>
-<ul>
-    {% for post in posts %}
-        <li class="post">
-            <div class="post-data">{{ moment(post.timestamp).fromNow() }}</div>
-            <div class="post-body">{{ post.body }}</div>
-        </li>
-    {% endfor %}
+
+{% include '_posts.html' %}
+<div class="pagination">
+    {{ macros.pagination_widget(pagination, '.index') }}
+</div>
 {% endblock %}

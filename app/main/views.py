@@ -1,7 +1,9 @@
 from flask import abort
+from flask import current_app
 from flask import flash
 from flask import redirect
 from flask import render_template
+from flask import request
 from flask import session
 from flask import url_for
 from flask.ext.login import login_required, current_user
@@ -13,38 +15,36 @@ from . import main
 from datetime import datetime as dt
 from .forms import LoginForm, PostForm, EditProfileForm, EditProfileAdminForm
 
+''' / and / hello'''
 
 @main.route('/', methods=['GET', 'POST'])
 def index():
+    page = request.args.get('page', 1, type=int)
+    pagination = Post.query.order_by(Post.timestamp.desc()).paginate(
+        page, per_page=current_app.config['FLASK_POST_PER_PAGE'],
+        error_out=False)
+    posts = pagination.items
     form = PostForm()
-    if form.validate_on_submit():
-        post = Post(body=form.body.data,author_id=1)
+    if current_user.can(Permission.WRITE_ARTICLES) and \
+            form.validate_on_submit():
+        post = Post(body=form.body.data,
+                    author=current_user._get_current_object())
         db.session.add(post)
         return redirect(url_for('.index'))
-    posts = Post.query.order_by(Post.timestamp.desc()).all()
-    return render_template('index.html', form=form, posts=posts)
-@main.route('/hello')
-def hello_world():
-    time = dt.now()
-    if session:
-        if session['name'] == 'sadscv@hotmail.com':
-            flash('OMG')
-    return render_template('base.html', time=time)
+    posts = pagination.items
+    return render_template('index.html', form=form, posts=posts,
+                           pagination=pagination)
 
-@main.route('/login/', methods=['GET', 'POST'])
-def login():
-    form = LoginForm()
-    if form.validate_on_submit():
-        session['name'] = form.username.data
-        return redirect(url_for('.hello_world'))
-    return  render_template('login.html', form=form)
+
+""" /user """
 
 @main.route('/user/<username>')
 def user(username):
     user = User.query.filter_by(username=username).first()
     if user is None:
         abort(404)
-    return render_template('user.html', user=user)
+    posts = user.posts.order_by(Post.timestamp.desc()).all()
+    return render_template('user.html', user=user, posts=posts)
 
 @main.route('/admin')
 @login_required
