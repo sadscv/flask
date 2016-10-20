@@ -1,3 +1,4 @@
+from flask.ext.pagedown.fields import PageDownField
 from flask_wtf import Form, validators
 from wtforms import  StringField, SubmitField, PasswordField, TextAreaField, SelectField
 from wtforms.validators import DataRequired, Email, Length, Regexp, ValidationError
@@ -15,7 +16,7 @@ class LoginForm(Form):
     submit = SubmitField('Submit')
 
 class PostForm(Form):
-    body = TextAreaField("enter the content", validators=[DataRequired()])
+    body = PageDownField('write something', validators=[DataRequired()])
     submit = SubmitField('Submit')
 
 class EditProfileForm(Form):
