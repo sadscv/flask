@@ -2,7 +2,10 @@ from datetime import datetime
 
 import bleach
 from flask import current_app
+from flask import url_for
+from itsdangerous import Serializer
 from markdown import markdown
+from wtforms import ValidationError
 
 from . import login_manager
 from flask_login import UserMixin, AnonymousUserMixin
@@ -40,6 +43,31 @@ class User(UserMixin, db.Model):
     about_me = db.Column(db.Text())
     member_since = db.Column(db.DateTime(), default=datetime.utcnow)
     last_seen = db.Column(db.DateTime(), default=datetime.utcnow)
+
+    def generate_auth_token(self, expiration):
+        s = Serializer(current_app.config['SECRET_KEY'],
+                       expires_in=expiration)
+        return s.dump({'id' : self.id})
+
+    def to_json(self):
+        json_user = {
+            'url': url_for('api.get_post', id=self.id, _external=True),
+            'username': self.username,
+            'member_since': self.member_since,
+            'last_seen': self.last_seen,
+            'posts': url_for('api.get_user_posts', id=self.id, _external=True),
+            'post_count': self.posts.count()
+        }
+        return json_user
+
+    @staticmethod
+    def verify_auth_token(token):
+        s = Serializer(current_app.config['SECRET_KEY'])
+        try:
+            data = s.loads(token)
+        except:
+            return None
+        return User.query.get(data['id'])
 
     @staticmethod
     def generate_fake(count=100):
@@ -145,6 +173,17 @@ class Post(db.Model):
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
+    def to_json(self):
+        json_post = {
+            'url' : url_for('api.get_post', id=self.id, _external=True),
+            'body' : self.body,
+            'body_html' : self.body_html,
+            'timestamp' : self.timestamp,
+            # 'author' : url_for('api.get_user', id=self.author_id,
+            #                    _external=True),
+        }
+        return json_post
+
     @staticmethod
     def generate_fake(count=100):
         from random import seed, randint
@@ -169,6 +208,14 @@ class Post(db.Model):
         # target.body_html = bleach.clean(
         #     markdown(value, output_format='html'),
         #     tags=allowed_tags, strip=True)
+
+    @staticmethod
+    def from_json(json_post):
+        body = json_post.get('body')
+        if body is None or body == '':
+            raise ValidationError('post does not have a body')
+        return Post(body=body)
+
 
     def __repr__(self):
         return '<Post %s>' % self.id
