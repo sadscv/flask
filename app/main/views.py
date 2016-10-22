@@ -6,7 +6,7 @@ from flask import render_template
 from flask import request
 from flask import session
 from flask import url_for
-from flask.ext.login import login_required, current_user
+from flask_login import login_required, current_user
 
 from app import db
 from app.decorator import admin_required, permission_required

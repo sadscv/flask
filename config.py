@@ -6,6 +6,7 @@ class Config:
     FLASK_ADMIN = 'sadscv@hotmail.com'
     FLASK_POST_PER_PAGE = 10
     SQLALCHEMY_COMMIT_ON_TEARDOWN = True
+    SQLALCHEMY_TRACK_MODIFICATIONS = True
 
     @staticmethod
     def init_app(app):
@@ -19,7 +20,8 @@ class DevelopmentConfig(Config):
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     SQLALCHEMY_DATABASE_URI = \
-        'mysql+pymysql://flask:sadsad@localhost:3306/flask_blog'
+        'mysql+pymysql://flask:sadsad@localhost:3306/flask_blog_dev'
+
 
 class TestingConfig(Config):
     TESTING = True

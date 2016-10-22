@@ -1,5 +1,5 @@
 from flask import Flask
-from flask.ext.pagedown import PageDown
+from flask_pagedown import PageDown
 from flask_login import LoginManager
 from flask_bootstrap import Bootstrap
 from flask_moment import Moment
