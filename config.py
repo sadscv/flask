@@ -20,17 +20,17 @@ class DevelopmentConfig(Config):
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     SQLALCHEMY_DATABASE_URI = \
-        'mysql+pymysql://flask:sadsad@localhost:3306/flask_blog_dev'
+        'mysql+pymysql://flask:sadsad@localhost:3306/flask_blog_dev?charset=utf8'
 
 
 class TestingConfig(Config):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = \
-        'mysql+pymysql://flask:sadsad@localhost:3306/flask_blog_test'
+        'mysql+pymysql://flask:sadsad@localhost:3306/flask_blog_test?charset=utf8'
 
 class ProductionConfig(Config):
     SQLALCHEMY_DATABASE_URI = \
-        'mysql+pymysql://flask:sadsad@localhost:3306/flask_blog'
+        'mysql+pymysql://flask:sadsad@localhost:3306/flask_blog?charset=utf8'
 
 config = {
     'development' : DevelopmentConfig,
