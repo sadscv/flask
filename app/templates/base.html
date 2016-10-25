@@ -32,7 +32,7 @@
                 </li>
                 {% endif %}
             </ul>
-            <ul class="nav navbar-right">
+            <ul class="nav navbar-nav navbar-right">
                 {% if current_user.is_authenticated %}
                 <li>
                     <a href="{{ url_for('auth.logout') }}">Sign out</a>
@@ -40,9 +40,9 @@
                 {% else %}
                 <li>
                     <a href="{{ url_for('auth.login') }}">Sign in</a>
-                    <a href="{{ url_for('auth.reg') }}">Sign up</a>
+
                 </li>
-                <li></li>
+                <li><a href="{{ url_for('auth.reg') }}">Sign up</a></li>
                 {% endif %}
             </ul>
         </div>
