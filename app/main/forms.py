@@ -1,6 +1,6 @@
 from flask_pagedown.fields import PageDownField
 from flask_wtf import Form, validators
-from wtforms import  StringField, SubmitField, PasswordField, TextAreaField, SelectField
+from wtforms import  StringField, SubmitField, PasswordField, TextAreaField, SelectField, IntegerField
 from wtforms.validators import DataRequired, Email, Length, Regexp, ValidationError
 
 from app.models import Role, User
@@ -16,6 +16,14 @@ class LoginForm(Form):
     submit = SubmitField('Submit')
 
 class PostForm(Form):
+    title = StringField('标题', validators=[DataRequired(), Length(1, 64, message='标题过长')])
+    content = TextAreaField('正文', validators=[DataRequired()])
+    tags = StringField('标签')
+    publicity = SelectField("对外公开", choices=[(1, "所有人可见"), (0, "仅自己可见")], coerce=int)
+    commendable = SelectField("允许评论", choices=[(1, "允许评论"), (0, "禁止评论")], coerce=int)
+    publish = SubmitField('发布')
+    post_id = IntegerField('id')
+    save = SubmitField('保存')
     body = PageDownField('write something', validators=[DataRequired()])
     submit = SubmitField('Submit')
 
