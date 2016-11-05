@@ -112,6 +112,7 @@ def create_post():
         return redirect(url_for('.index'))
     return render_template('create_post.html', form=form)
 
+@login_required
 @main.route('/upload', methods=['GET', 'POST'])
 def handle_upload():
     form = FileUploadForm()
