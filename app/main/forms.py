@@ -1,6 +1,7 @@
+from flask.ext.wtf.file import FileRequired, FileAllowed
 from flask_pagedown.fields import PageDownField
 from flask_wtf import Form, validators
-from wtforms import  StringField, SubmitField, PasswordField, TextAreaField, SelectField, IntegerField
+from wtforms import  StringField, SubmitField, PasswordField, TextAreaField, SelectField, IntegerField, FileField
 from wtforms.validators import DataRequired, Email, Length, Regexp, ValidationError
 
 from app.models import Role, User
@@ -56,3 +57,10 @@ class EditProfileAdminForm(Form):
         if field.data != self.user.username and \
             User.query.filter_by(username=field.data).first():
             raise  ValidationError('Username already used.')
+
+
+class FileUploadForm(Form):
+    upload = FileField('file')
+    submit = SubmitField('Submit')
+
+

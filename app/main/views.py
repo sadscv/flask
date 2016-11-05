@@ -7,13 +7,15 @@ from flask import request
 from flask import session
 from flask import url_for
 from flask_login import login_required, current_user
+from werkzeug.utils import secure_filename
 
 from app import db
 from app.decorator import admin_required, permission_required
 from app.models import Post, Permission, User, Role
 from . import main
 from datetime import datetime as dt
-from .forms import LoginForm, PostForm, EditProfileForm, EditProfileAdminForm
+from .forms import LoginForm, PostForm, EditProfileForm, EditProfileAdminForm, FileUploadForm
+
 
 @main.route('/', methods=['GET', 'POST'])
 def index():
@@ -109,3 +111,13 @@ def create_post():
         db.session.add(post)
         return redirect(url_for('.index'))
     return render_template('create_post.html', form=form)
+
+@main.route('/upload', methods=['GET', 'POST'])
+def handle_upload():
+    form = FileUploadForm()
+    if form.validate_on_submit():
+        filename = secure_filename(form.upload.data.filename)
+        form.upload.data.save('uploads/' + filename)
+    else:
+        filename = None
+    return render_template('upload.html', form=form, filename=filename)
