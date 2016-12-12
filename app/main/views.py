@@ -4,19 +4,20 @@ from flask import flash
 from flask import redirect
 from flask import render_template
 from flask import request
-from flask import session
 from flask import url_for
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 
 from app import db
-from app.decorator import admin_required, permission_required
+from app.decorator import admin_required
 from app.models import Post, Permission, User, Role
 from . import main
 from datetime import datetime as dt
-from .forms import LoginForm, PostForm, EditProfileForm, EditProfileAdminForm, FileUploadForm
+from .forms import PostForm, EditProfileForm, EditProfileAdminForm, \
+                    FileUploadForm
 
 
+#主页
 @main.route('/', methods=['GET', 'POST'])
 def index():
     page = request.args.get('page', 1, type=int)
@@ -29,6 +30,7 @@ def index():
 
 
 
+#用户信息
 @main.route('/user/<username>')
 def user(username):
     user = User.query.filter_by(username=username).first()
@@ -38,12 +40,61 @@ def user(username):
     return render_template('user.html', user=user, posts=posts)
 
 
+#文章地址
 @main.route('/post/<int:id>')
 def post(id):
     post = Post.query.get_or_404(id)
     return  render_template('post.html', posts=[post])
 
 
+#创建文章
+@main.route('/create-post', methods=['GET', 'POST'])
+@login_required
+def create_post():
+    form = PostForm()
+    if current_user.can(Permission.WRITE_ARTICLES) and \
+            form.validate_on_submit():
+        post = Post(body=form.content.data,
+                    author=current_user._get_current_object())
+        db.session.add(post)
+        return redirect(url_for('.index'))
+    return render_template('create_post.html', form=form)
+
+
+#编辑文章内容
+@main.route('/edit_post/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edit_post(id):
+    post = Post.query.get_or_404(id)
+    if current_user != post.author and not current_user.can(Permission.ADMIN):
+        abort(403)
+    form = PostForm()
+    if form.validate_on_submit():
+        post.body = form.content.data
+        post.title = form.title.data
+        post.edit_date = dt.utcnow()
+        db.session.add(post)
+        flash('post has been updated')
+        return redirect(url_for('.post', id=post.id))
+    form.title.data = post.title
+    form.content.data = post.body
+    return render_template('edit_post.html', form=form)
+
+#删除文章
+@main.route('/delete_post/<int:id>', methods=['GET'])
+@login_required
+@admin_required
+def delete_post(id):
+    if not current_user.can(Permission.ADMIN):
+        abort(403)
+    post = Post.query.get_or_404(id)
+    db.session.delete(post)
+    flash('post deleted')
+    return redirect(url_for('.index'))
+
+
+
+#修改个人信息
 @main.route('/edit-profile', methods=['GET', 'POST'])
 @login_required
 def edit_profile():
@@ -60,6 +111,7 @@ def edit_profile():
     form.about_me.data = current_user.about_me
     return render_template('edit_profile.html', form=form)
 
+#修改用户信息（Admin)
 @main.route('/edit-profile/<int:id>', methods=['GET', 'POST'])
 @login_required
 @admin_required
@@ -85,33 +137,9 @@ def edit_profile_admin(id):
     return render_template('edit_profile.html', form=form, user=user)
 
 
-@main.route('/edit/<int:id>', methods=['GET', 'POST'])
-@login_required
-def edit(id):
-    post = Post.query.get_or_404(id)
-    if current_user != post.author and not current_user.can(Permission.ADMIN):
-        abort(403)
-    form = PostForm()
-    if form.validate_on_submit():
-        post.body = form.content.data
-        db.session.add(post)
-        flash('post has been updated')
-        return redirect(url_for('.post', id=post.id))
-    form.content.data = post.body
-    return render_template('edit_post.html', form=form)
 
-@main.route('/create-post', methods=['GET', 'POST'])
-@login_required
-def create_post():
-    form = PostForm()
-    if current_user.can(Permission.WRITE_ARTICLES) and \
-            form.validate_on_submit():
-        post = Post(body=form.content.data,
-                    author=current_user._get_current_object())
-        db.session.add(post)
-        return redirect(url_for('.index'))
-    return render_template('create_post.html', form=form)
 
+#上传页面
 @login_required
 @main.route('/upload', methods=['GET', 'POST'])
 def handle_upload():

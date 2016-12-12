@@ -44,6 +44,7 @@ class User(UserMixin, db.Model):
     member_since = db.Column(db.DateTime(), default=datetime.utcnow)
     last_seen = db.Column(db.DateTime(), default=datetime.utcnow)
 
+
     def generate_auth_token(self, expiration):
         s = Serializer(current_app.config['SECRET_KEY'],
                        expires_in=expiration)
@@ -124,6 +125,9 @@ class AnonymousUser(AnonymousUserMixin):
     def is_administrator(self):
         return False
 
+    def is_anonymous(self):
+        return True
+
 login_manager.anonymous_user = AnonymousUser
 
 
@@ -172,6 +176,8 @@ class Post(db.Model):
     body_html = db.Column(db.Text)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    title = db.Column('title', db.String(128))
+    edit_date = db.Column('edit_date', db.DateTime)
 
     def to_json(self):
         json_post = {

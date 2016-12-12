@@ -17,10 +17,11 @@ class LoginForm(Form):
     submit = SubmitField('Submit')
 
 class PostForm(Form):
-    title = StringField('标题', validators=[DataRequired(), Length(1, 64, message='标题过长')])
+    title = StringField('标题', validators=[Length(0, 64, message='标题过长')])
     content = PageDownField('正文', validators=[DataRequired()])
     publish = SubmitField('发布')
     save = SubmitField('保存')
+    delete = SubmitField('删除')
 
 class EditProfileForm(Form):
     name = StringField('Real name', validators=[Length(0, 64)])
