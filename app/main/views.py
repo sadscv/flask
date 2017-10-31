@@ -141,12 +141,12 @@ def edit_profile_admin(id):
 
 #上传页面
 @login_required
-@main.route('/upload/images', methods=['GET', 'POST'])
+@main.route('/upload', methods=['GET', 'POST'])
 def handle_upload():
     form = FileUploadForm()
     if form.validate_on_submit():
         filename = secure_filename(form.upload.data.filename)
-        form.upload.data.save('uploads/' + filename)
+        form.upload.data.save('uploads/images' + filename)
     else:
         filename = None
     return render_template('upload.html', form=form, filename=filename)
