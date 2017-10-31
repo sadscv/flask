@@ -141,7 +141,7 @@ def edit_profile_admin(id):
 
 #上传页面
 @login_required
-@main.route('/upload', methods=['GET', 'POST'])
+@main.route('/upload/images', methods=['GET', 'POST'])
 def handle_upload():
     form = FileUploadForm()
     if form.validate_on_submit():
