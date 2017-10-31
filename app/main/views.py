@@ -146,7 +146,8 @@ def handle_upload():
     form = FileUploadForm()
     if form.validate_on_submit():
         filename = secure_filename(form.upload.data.filename)
-        form.upload.data.save('uploads/images' + filename)
+        form.upload.data.save('uploads/images/' + filename)
+        flash('www.sadscv.com/images/'+filename)
     else:
         filename = None
     return render_template('upload.html', form=form, filename=filename)
