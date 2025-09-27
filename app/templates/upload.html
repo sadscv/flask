@@ -1,11 +1,91 @@
-{% extends 'base.html' %}
-{% import "bootstrap/wtf.html" as wtf %}
+{% extends "base.html" %}
 
-{% block title %}Upload{% endblock %}
+{% block title %}上传文件{% endblock %}
 
 {% block page_content %}
-<div class="page-header">
-    <h1>upload page</h1>
+<div class="max-w-4xl mx-auto">
+    <!-- Upload Header -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8 mb-6">
+        <div class="text-center mb-8">
+            <div class="mx-auto w-16 h-16 bg-purple-500 rounded-full flex items-center justify-center mb-4">
+                <i class="fas fa-upload text-white text-2xl"></i>
+            </div>
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">上传文件</h1>
+            <p class="text-gray-600">选择要上传的文件，支持多种格式</p>
+        </div>
+
+        <form action="" method="post" enctype="multipart/form-data" class="space-y-6">
+            {{ form.hidden_tag() }}
+
+            <!-- File Upload Field -->
+            <div>
+                <label for="upload" class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fas fa-file text-gray-400 mr-2"></i>选择文件
+                </label>
+                <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-purple-400 transition-colors duration-200">
+                    <div class="space-y-1 text-center">
+                        <i class="fas fa-cloud-upload-alt text-4xl text-gray-400"></i>
+                        <div class="flex text-sm text-gray-600">
+                            <label for="upload" class="relative cursor-pointer bg-white rounded-md font-medium text-purple-600 hover:text-purple-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-purple-500 focus-within:ring-offset-2">
+                                <span>点击上传文件</span>
+                                <input id="upload" name="upload" type="file" class="sr-only" />
+                            </label>
+                            <p class="pl-1">或拖拽文件到此处</p>
+                        </div>
+                    </div>
+                </div>
+                <p class="mt-2 text-sm text-gray-500">
+                    支持 PNG, JPG, GIF, PDF, DOC, DOCX, TXT 等格式
+                </p>
+                {% if form.upload.errors %}
+                    <div class="mt-1 text-sm text-red-600">
+                        {% for error in form.upload.errors %}
+                            <i class="fas fa-exclamation-circle mr-1"></i>{{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Submit Button -->
+            <div class="flex justify-center pt-6 border-t border-gray-200">
+                <button type="submit" class="bg-purple-500 hover:bg-purple-600 text-white px-8 py-3 rounded-lg font-medium transition-colors duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 inline-flex items-center">
+                    <i class="fas fa-cloud-upload-alt mr-2"></i>开始上传
+                </button>
+            </div>
+        </form>
+
+        <!-- Additional Info -->
+        <div class="mt-8 bg-blue-50 border-l-4 border-blue-400 p-4">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-info-circle text-blue-400"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-blue-700">
+                        <strong>上传提示：</strong><br>
+                        • 单个文件大小不超过 10MB<br>
+                        • 支持的文件格式：图片、文档、文本等<br>
+                        • 上传的文件将保存在服务器上
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Uploads Section (Optional) -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <h2 class="text-2xl font-bold text-gray-900 mb-6">
+            <i class="fas fa-history text-purple-600 mr-3"></i>最近上传
+        </h2>
+
+        <!-- Placeholder for recent uploads -->
+        <div class="text-center py-12">
+            <div class="mb-4">
+                <i class="fas fa-folder-open text-6xl text-gray-300"></i>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-900 mb-2">暂无上传记录</h3>
+            <p class="text-gray-500">您的文件上传记录将显示在这里</p>
+        </div>
+    </div>
 </div>
-{{ wtf.quick_form(form) }}
 {% endblock %}

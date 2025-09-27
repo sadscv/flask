@@ -1,66 +1,183 @@
-.profile-thumbnail {
-    position: absolute;
-}
-.profile-header {
-    min-height: 260px;
-    margin-left: 280px;
-}
-ul.posts {
-    list-style-type: none;
-    padding: 0px;
-    margin: 16px 0px 0px 0px;
-    border-top: 1px solid #e0e0e0;
-}
-ul.posts li.post {
-    padding: 8px;
-    border-bottom: 1px solid #e0e0e0;
-}
-ul.posts li.post:hover {
-    background-color: #f0f0f0;
-}
-div.post-date {
-    float: right;
-}
-div.post-author {
-    font-weight: bold;
-}
-div.post-thumbnail {
-    position: absolute;
-}
-div.post-content {
-    margin-left: 12px;
-    min-height: 48px;
-}
-div.post-footer {
-    text-align: right;
-}
-div.pagination {
-    width: 100%;
-    text-align: right;
-    padding: 0px;
-    margin: 0px;
-}
-div.flask-pagedown-preview {
-    margin: 10px 0px 10px 0px;
-    border: 1px solid #e0e0e0;
-    padding: 4px;
-}
-div.flask-pagedown-preview h1 {
-    font-size: 140%;
-}
-div.flask-pagedown-preview h2 {
-    font-size: 130%;
-}
-div.flask-pagedown-preview h3 {
-    font-size: 120%;
-}
-.post-body h1 {
-    font-size: 140%;
-}
-.post-body h2 {
-    font-size: 130%;
-}
-.post-body h3 {
-    font-size: 120%;
+/* Custom styles for Modern Blog */
+
+/* Typography improvements */
+.prose {
+    line-height: 1.6;
+    color: #374151;
 }
 
+.prose h1, .prose h2, .prose h3 {
+    font-weight: 600;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+    color: #111827;
+}
+
+.prose h1 {
+    font-size: 1.875rem;
+}
+
+.prose h2 {
+    font-size: 1.5rem;
+}
+
+.prose h3 {
+    font-size: 1.25rem;
+}
+
+.prose p {
+    margin-bottom: 1rem;
+}
+
+.prose ul, .prose ol {
+    margin-bottom: 1rem;
+    padding-left: 1.5rem;
+}
+
+.prose li {
+    margin-bottom: 0.5rem;
+}
+
+.prose a {
+    color: #2563eb;
+    text-decoration: underline;
+    text-decoration-color: #dbeafe;
+    text-underline-offset: 2px;
+    transition: all 0.2s ease;
+}
+
+.prose a:hover {
+    color: #1d4ed8;
+    text-decoration-color: #93c5fd;
+}
+
+.prose code {
+    background-color: #f3f4f6;
+    padding: 0.125rem 0.25rem;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+    color: #dc2626;
+}
+
+.prose pre {
+    background-color: #1f2937;
+    color: #f9fafb;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    overflow-x: auto;
+    margin-bottom: 1rem;
+}
+
+.prose blockquote {
+    border-left: 4px solid #e5e7eb;
+    padding-left: 1rem;
+    margin: 1rem 0;
+    color: #6b7280;
+    font-style: italic;
+}
+
+/* User avatar styles */
+.avatar-circle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: white;
+    text-transform: uppercase;
+}
+
+/* Hover effects for cards */
+.hover-card {
+    transition: all 0.3s ease;
+}
+
+.hover-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Button hover effects */
+.btn-hover {
+    transition: all 0.2s ease;
+}
+
+.btn-hover:hover {
+    transform: scale(1.05);
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+    .prose h1 {
+        font-size: 1.5rem;
+    }
+
+    .prose h2 {
+        font-size: 1.25rem;
+    }
+
+    .prose h3 {
+        font-size: 1.125rem;
+    }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f3f4f6;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+}
+
+/* Focus styles for accessibility */
+button:focus,
+a:focus,
+input:focus,
+textarea:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+/* Loading animation */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.loading {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Print styles */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+
+    .print-only {
+        display: block !important;
+    }
+
+    body {
+        background: white !important;
+        color: black !important;
+    }
+}
+
+/* Print hidden by default */
+.print-only {
+    display: none;
+}

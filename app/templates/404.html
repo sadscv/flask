@@ -1,9 +1,81 @@
 {% extends "base.html" %}
 
-{% block title %}Flasky - Page Not Found{% endblock %}
+{% block title %}404 - 页面未找到{% endblock %}
 
 {% block page_content %}
-<div class="page-header">
-    <h1>Not Found</h1>
+<div class="max-w-4xl mx-auto">
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
+        <!-- Error Icon -->
+        <div class="mb-8">
+            <div class="mx-auto w-24 h-24 bg-red-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-exclamation-triangle text-red-600 text-4xl"></i>
+            </div>
+        </div>
+
+        <!-- Error Title -->
+        <h1 class="text-6xl font-bold text-gray-900 mb-4">404</h1>
+        <h2 class="text-2xl font-semibold text-gray-700 mb-6">页面未找到</h2>
+
+        <!-- Error Description -->
+        <p class="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+            抱歉，您访问的页面不存在或已被移除。
+            请检查网址是否正确，或返回首页重新开始。
+        </p>
+
+        <!-- Action Buttons -->
+        <div class="flex justify-center space-x-4">
+            <a href="/" class="bg-blue-500 hover:bg-blue-600 text-white px-8 py-3 rounded-lg font-medium transition-colors duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 inline-flex items-center">
+                <i class="fas fa-home mr-2"></i>返回首页
+            </a>
+
+            {% if current_user.is_authenticated %}
+            <a href="{{ url_for('main.create_post') }}" class="bg-green-500 hover:bg-green-600 text-white px-8 py-3 rounded-lg font-medium transition-colors duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 inline-flex items-center">
+                <i class="fas fa-plus mr-2"></i>创建文章
+            </a>
+            {% else %}
+            <a href="{{ url_for('auth.login') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-8 py-3 rounded-lg font-medium transition-colors duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 inline-flex items-center">
+                <i class="fas fa-sign-in-alt mr-2"></i>登录
+            </a>
+            {% endif %}
+        </div>
+
+        <!-- Additional Help -->
+        <div class="mt-12 pt-8 border-t border-gray-200">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">您可能想要：</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl mx-auto">
+                <a href="/" class="block p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200">
+                    <i class="fas fa-newspaper text-blue-600 text-2xl mb-2"></i>
+                    <p class="font-medium text-gray-900">浏览文章</p>
+                    <p class="text-sm text-gray-600 mt-1">查看最新的博客文章</p>
+                </a>
+
+                {% if current_user.is_authenticated %}
+                <a href="{{ url_for('main.user', username=current_user.username) }}" class="block p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200">
+                    <i class="fas fa-user text-green-600 text-2xl mb-2"></i>
+                    <p class="font-medium text-gray-900">个人主页</p>
+                    <p class="text-sm text-gray-600 mt-1">查看您的个人资料</p>
+                </a>
+
+                <a href="{{ url_for('main.create_post') }}" class="block p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200">
+                    <i class="fas fa-pen text-purple-600 text-2xl mb-2"></i>
+                    <p class="font-medium text-gray-900">创作文章</p>
+                    <p class="text-sm text-gray-600 mt-1">分享您的想法</p>
+                </a>
+                {% else %}
+                <a href="{{ url_for('auth.login') }}" class="block p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200">
+                    <i class="fas fa-sign-in-alt text-blue-600 text-2xl mb-2"></i>
+                    <p class="font-medium text-gray-900">登录账户</p>
+                    <p class="text-sm text-gray-600 mt-1">登录以获取更多功能</p>
+                </a>
+
+                <a href="{{ url_for('auth.reg') }}" class="block p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200">
+                    <i class="fas fa-user-plus text-green-600 text-2xl mb-2"></i>
+                    <p class="font-medium text-gray-900">注册账户</p>
+                    <p class="text-sm text-gray-600 mt-1">加入我们的社区</p>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

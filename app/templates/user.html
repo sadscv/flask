@@ -1,40 +1,112 @@
 {% extends "base.html" %}
+
+{% block title %}{{ user.username }}{% endblock %}
+
 {% block page_content %}
-<div class="page-header">
-    <h1>{{ user.username }}</h1>
-    {% if user.name or user.location %}
-    <p>
-        {% if user.name %}{{ user.name }}{% endif %}
-        {% if user.location %}
-            From <a href="http://map.baidu.com/?q={{ user.location }}">
-            {{ user.location }}
-            </a>
+<div class="max-w-4xl mx-auto">
+    <!-- User Profile Header -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8 mb-8">
+        <div class="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-6">
+            <!-- User Avatar -->
+            <div class="flex-shrink-0">
+                <div class="w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-3xl font-bold">
+                    {{ user.username[0].upper() }}
+                </div>
+            </div>
+
+            <!-- User Info -->
+            <div class="flex-1 text-center md:text-left">
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">
+                    {{ user.username }}
+                </h1>
+
+                <!-- Additional Info -->
+                <div class="space-y-2 mb-4">
+                    {% if user.name %}
+                    <p class="text-lg text-gray-700">
+                        <i class="fas fa-user text-gray-400 mr-2"></i>{{ user.name }}
+                    </p>
+                    {% endif %}
+
+                    {% if user.location %}
+                    <p class="text-gray-600">
+                        <i class="fas fa-map-marker-alt text-gray-400 mr-2"></i>
+                        <a href="http://map.baidu.com/?q={{ user.location }}" class="text-blue-600 hover:text-blue-800 transition-colors duration-200" target="_blank">
+                            {{ user.location }}
+                        </a>
+                    </p>
+                    {% endif %}
+
+                    {% if user.about_me %}
+                    <p class="text-gray-600 italic">
+                        <i class="fas fa-quote-left text-gray-400 mr-2"></i>{{ user.about_me }}
+                    </p>
+                    {% endif %}
+                </div>
+
+                <!-- Stats -->
+                <div class="flex flex-wrap justify-center md:justify-start gap-6 text-sm text-gray-500">
+                    <div class="flex items-center">
+                        <i class="fas fa-calendar-alt text-gray-400 mr-1"></i>
+                        加入 {{ moment(user.member_since).format('L') }}
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-clock text-gray-400 mr-1"></i>
+                        最后活跃 {{ moment(user.last_seen).fromNow() }}
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-edit text-gray-400 mr-1"></i>
+                        {{ user.posts|length }} 篇文章
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex-shrink-0">
+                {% if user == current_user %}
+                    <a href="{{ url_for('.edit_profile') }}" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 inline-flex items-center">
+                        <i class="fas fa-edit mr-2"></i>编辑资料
+                    </a>
+                {% endif %}
+
+                {% if current_user.is_administrator() %}
+                    <a href="{{ url_for('.edit_profile_admin', id=user.id) }}" class="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 inline-flex items-center ml-2">
+                        <i class="fas fa-user-shield mr-2"></i>管理员编辑
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- User's Posts Section -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-gray-900">
+                <i class="fas fa-newspaper text-blue-600 mr-3"></i>{{ user.username }} 的文章
+            </h2>
+            <span class="text-sm text-gray-500">
+                共 {{ posts|length }} 篇
+            </span>
+        </div>
+
+        <!-- Posts List -->
+        {% include '_posts.html' %}
+
+        <!-- Empty State -->
+        {% if not posts %}
+        <div class="text-center py-12">
+            <div class="mb-4">
+                <i class="fas fa-file-alt text-6xl text-gray-300"></i>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-900 mb-2">暂无文章</h3>
+            <p class="text-gray-500">{{ user.username }} 还没有发布任何文章。</p>
+            {% if user == current_user %}
+                <a href="{{ url_for('main.create_post') }}" class="mt-4 inline-flex bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200 transform hover:scale-105">
+                    <i class="fas fa-plus mr-2"></i>创建第一篇文章
+                </a>
+            {% endif %}
+        </div>
         {% endif %}
-    </p>
-    {% endif %}
-    {% if current_user.is_administrator() %}
-    <p><a>hi ,admin.</a></p>
-    {% endif %}
-    {% if user.about_me %}<p>{{ user.about_me }}</p>{% endif %}
-    <p>
-        Join since {{ moment(user.member_since).format('L') }}
-    </p>
-    <p>
-        Last seen {{ moment(user.last_seen).fromNow() }}
-    </p>
-</div>
-{% if user == current_user %}
-    <a class="btn btn-default" href="{{ url_for('.edit_profile') }}">
-        Edit Profile
-    </a>
-{% endif %}
-{% if current_user.is_administrator() %}
-    <a class="btn btn-danger" href="{{ url_for('.edit_profile_admin', id=user.id) }}">
-        Edit Profile [for Admin]
-    </a>
-{% endif %}
-<div>
-    <h3>Posts by {{ user.username }}</h3>
-    {% include '_posts.html' %}
+    </div>
 </div>
 {% endblock %}

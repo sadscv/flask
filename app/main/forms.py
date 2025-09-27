@@ -1,6 +1,6 @@
-from flask.ext.wtf.file import FileRequired, FileAllowed
+from flask_wtf.file import FileRequired, FileAllowed
 from flask_pagedown.fields import PageDownField
-from flask_wtf import Form, validators
+from flask_wtf import FlaskForm as Form
 from wtforms import  StringField, SubmitField, PasswordField, TextAreaField, SelectField, IntegerField, FileField
 from wtforms.validators import DataRequired, Email, Length, Regexp, ValidationError
 

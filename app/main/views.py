@@ -78,7 +78,7 @@ def edit_post(id):
         return redirect(url_for('.post', id=post.id))
     form.title.data = post.title
     form.content.data = post.body
-    return render_template('edit_post.html', form=form)
+    return render_template('edit_post.html', form=form, post=post)
 
 #删除文章
 @main.route('/delete_post/<int:id>', methods=['GET'])

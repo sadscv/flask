@@ -1,31 +1,54 @@
 {% macro pagination_widget(pagination, endpoint) %}
-<ul class="pagination">
-    <li {% if not pagination.has_prev %} class="disabled" {% endif %}>
-        <a href="{% if pagination.has_prv %}{{ url_for(endpoint,
-                page = pagination.page - 1, **kwargs) }}{% else %}#{% endif %}">
-            &laquo;
-        </a>
-    </li>
+<nav class="flex items-center justify-center space-x-2" role="navigation" aria-label="Pagination">
+    <!-- Previous Button -->
+    {% if pagination.has_prev %}
+    <a href="{{ url_for(endpoint, page=pagination.prev_num, **kwargs) }}"
+       class="flex items-center px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 transition-colors duration-200"
+       aria-label="Previous page">
+        <i class="fas fa-chevron-left mr-2"></i>
+        上一页
+    </a>
+    {% else %}
+    <span class="flex items-center px-3 py-2 text-sm font-medium text-gray-300 bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed"
+          aria-disabled="true">
+        <i class="fas fa-chevron-left mr-2"></i>
+        上一页
+    </span>
+    {% endif %}
+
+    <!-- Page Numbers -->
     {% for p in pagination.iter_pages() %}
         {% if p %}
-            {% if p == pagination.page %}
-            <li class="active">
-                <a href="{{ url_for(endpoint, page = p, **kwargs) }}">{{ p }}</a>
-            </li>
+            {% if p != pagination.page %}
+                <a href="{{ url_for(endpoint, page=p, **kwargs) }}"
+                   class="flex items-center px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 transition-colors duration-200">
+                    {{ p }}
+                </a>
             {% else %}
-            <li>
-                <a href="{{ url_for(endpoint, page = p, **kwargs) }}">{{ p }}</a>
-            </li>
+                <span class="flex items-center px-3 py-2 text-sm font-medium text-white bg-blue-600 border border-blue-600 rounded-lg"
+                      aria-current="page">
+                    {{ p }}
+                </span>
             {% endif %}
         {% else %}
-        <li class="disabled"><a href="#">&hellip;</a> </li>
+            <span class="flex items-center px-3 py-2 text-sm font-medium text-gray-500">...</span>
         {% endif %}
     {% endfor %}
-    <li{% if not pagination.has_next %} class="disabled"{% endif %}>
-        <a href="{% if pagination.has_next %}{{ url_for(endpoint,
-                page = pagination.page + 1, **kwargs) }}{% else %}#{% endif %}">
-            &raquo;
-        </a>
-    </li>
-</ul>
+
+    <!-- Next Button -->
+    {% if pagination.has_next %}
+    <a href="{{ url_for(endpoint, page=pagination.next_num, **kwargs) }}"
+       class="flex items-center px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 transition-colors duration-200"
+       aria-label="Next page">
+        下一页
+        <i class="fas fa-chevron-right ml-2"></i>
+    </a>
+    {% else %}
+    <span class="flex items-center px-3 py-2 text-sm font-medium text-gray-300 bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed"
+          aria-disabled="true">
+        下一页
+        <i class="fas fa-chevron-right ml-2"></i>
+    </span>
+    {% endif %}
+</nav>
 {% endmacro %}

@@ -1,51 +1,75 @@
-<ul class="posts">
+<div class="space-y-6">
     {% for post in posts %}
-        <li class="post">
-            <div class="post-content">
-                {% if post.edit_date %}
-                <div class="post-date">
-                    {{ moment(post.edit_date).fromNow()}}
-                    edited
-                </div>
-                {% else %}
-                <div class="post-date">
-                    {{ moment(post.timestamp).fromNow() }}
-                    created
-                </div>
-                {% endif %}
-                <div class="post-author">
-                    <a href="{{ url_for('.user', username=post.author.username)}}">
-                        {{ post.author.username }}
-                    </a>
-                </div>
-                <div class="post-body">
-                    {% if post.body_html %}
-                        {{ post.body_html | safe }}
-                    {% else %}
-                        {{ post.body }}
-                {% endif %}
-                </div>
-                <div class="post-footer">
-                    {% if current_user.is_anonymous %}
-                    <a href="{{ url_for('.post', id=post.id) }}">
-                        <span class="label label-default">Permalink</span>
-                    </a>
-                    {% endif %}
-                    {% if current_user.is_administrator() %}
-                        <a href="{{ url_for('.edit_post', id=post.id) }}">
-                            <span class="label label-primary">Edit</span>
-                        </a>
-                        <a href="{{ url_for('.delete_post', id=post.id) }}"
-                           onclick="return confirm('delete?')">
-                            <span class="label label-danger">Delete</span>
-                        </a>
-                    {% elif current_user == post.author %}
-                    <a href="{{ url_for('.edit_post', id=post.id) }}">
-                        <span class="label label-primary">Edit</span>
-                    </a>
-                    {% endif %}
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200">
+            <div class="flex items-start justify-between">
+                <div class="flex-1">
+                    <!-- Post Header -->
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold mr-3">
+                            {{ post.author.username[0].upper() }}
+                        </div>
+                        <div>
+                            <a href="{{ url_for('.user', username=post.author.username) }}" class="font-medium text-gray-900 hover:text-blue-600">
+                                {{ post.author.username }}
+                            </a>
+                            <div class="text-sm text-gray-500">
+                                {% if post.edit_date %}
+                                    <i class="fas fa-edit mr-1"></i>{{ moment(post.edit_date).fromNow() }} edited
+                                {% else %}
+                                    <i class="fas fa-clock mr-1"></i>{{ moment(post.timestamp).fromNow() }}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Post Content -->
+                    <div class="prose prose-sm max-w-none mb-4">
+                        {% if post.body_html %}
+                            {{ post.body_html | safe }}
+                        {% else %}
+                            <p class="text-gray-700">{{ post.body }}</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Post Footer -->
+                    <div class="flex justify-end">
+                        <!-- Action Buttons -->
+                        <div class="flex items-center space-x-2">
+                            {% if current_user.is_anonymous %}
+                                <a href="{{ url_for('.post', id=post.id) }}" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                                    <i class="fas fa-external-link-alt mr-1"></i>Permalink
+                                </a>
+                            {% endif %}
+
+                            {% if current_user.is_administrator() %}
+                                <a href="{{ url_for('.edit_post', id=post.id) }}" class="text-green-600 hover:text-green-800 text-sm font-medium">
+                                    <i class="fas fa-edit mr-1"></i>Edit
+                                </a>
+                                <a href="{{ url_for('.delete_post', id=post.id) }}"
+                                   onclick="return confirm('delete?')"
+                                   class="text-red-600 hover:text-red-800 text-sm font-medium">
+                                    <i class="fas fa-trash mr-1"></i>Delete
+                                </a>
+                            {% elif current_user == post.author %}
+                                <a href="{{ url_for('.edit_post', id=post.id) }}" class="text-green-600 hover:text-green-800 text-sm font-medium">
+                                    <i class="fas fa-edit mr-1"></i>Edit
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
             </div>
-        </li>
+        </div>
     {% endfor %}
-</ul>
+</div>
+
+<!-- Empty State -->
+{% if not posts %}
+<div class="text-center py-12">
+    <div class="mb-4">
+        <i class="fas fa-inbox text-6xl text-gray-300"></i>
+    </div>
+    <h3 class="text-xl font-semibold text-gray-900 mb-2">暂无文章</h3>
+    <p class="text-gray-500">还没有任何文章内容。</p>
+</div>
+{% endif %}
