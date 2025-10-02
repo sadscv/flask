@@ -28,14 +28,73 @@
                     {% endif %}
                 </div>
 
-                <!-- Content Field -->
+                <!-- Content Field with Enhanced Markdown Editor -->
                 <div>
                     <label for="content" class="block text-sm font-medium text-gray-700 mb-2">
-                        <i class="fas fa-file-alt text-gray-400 mr-2"></i>正文
+                        <i class="fas fa-edit text-gray-400 mr-2"></i>正文内容 (Markdown)
                     </label>
-                    {{ form.content(class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 min-h-[400px]", rows="20", required="") }}
+
+                    <!-- Enhanced Editor Container -->
+                    <div class="border border-gray-300 rounded-lg overflow-hidden">
+                        <!-- Toolbar -->
+                        <div class="bg-gray-50 border-b border-gray-200 p-3 flex flex-wrap gap-2">
+                            <button type="button" onclick="formatText('**', '**')" class="px-3 py-1 text-sm bg-white border border-gray-300 rounded hover:bg-gray-100 transition-colors" title="粗体 (Ctrl+B)">
+                                <strong>B</strong>
+                            </button>
+                            <button type="button" onclick="formatText('*', '*')" class="px-3 py-1 text-sm bg-white border border-gray-300 rounded hover:bg-gray-100 transition-colors" title="斜体 (Ctrl+I)">
+                                <em>I</em>
+                            </button>
+                            <button type="button" onclick="formatText('`', '`')" class="px-3 py-1 text-sm bg-white border border-gray-300 rounded hover:bg-gray-100 transition-colors" title="代码">
+                                <code>&lt;/&gt;</code>
+                            </button>
+                            <button type="button" onclick="formatText('# ', '')" class="px-3 py-1 text-sm bg-white border border-gray-300 rounded hover:bg-gray-100 transition-colors" title="标题">
+                                H
+                            </button>
+                            <button type="button" onclick="formatText('> ', '')" class="px-3 py-1 text-sm bg-white border border-gray-300 rounded hover:bg-gray-100 transition-colors" title="引用">
+                                ❝
+                            </button>
+                            <button type="button" onclick="formatText('- ', '')" class="px-3 py-1 text-sm bg-white border border-gray-300 rounded hover:bg-gray-100 transition-colors" title="列表">
+                                •
+                            </button>
+                            <button type="button" onclick="formatText('[', '](url)')" class="px-3 py-1 text-sm bg-white border border-gray-300 rounded hover:bg-gray-100 transition-colors" title="链接 (Ctrl+K)">
+                                🔗
+                            </button>
+                            <button type="button" onclick="insertTable()" class="px-3 py-1 text-sm bg-white border border-gray-300 rounded hover:bg-gray-100 transition-colors" title="表格">
+                                ⊞
+                            </button>
+                            <div class="ml-auto text-xs text-gray-500">
+                                Ctrl+B 粗体 | Ctrl+I 斜体 | Ctrl+K 链接
+                            </div>
+                        </div>
+
+                        <!-- Split Editor Layout -->
+                        <div class="grid grid-cols-1 lg:grid-cols-2 h-[500px]">
+                            <!-- CodeMirror Editor -->
+                            <div class="border-r border-gray-200">
+                                <div class="bg-gray-100 px-3 py-2 text-xs text-gray-600 border-b border-gray-200">
+                                    Markdown 源码
+                                </div>
+                                {{ form.content(class="w-full h-full p-4 font-mono text-sm resize-none focus:outline-none", id="markdown-editor", rows="20", required="") }}
+                            </div>
+
+                            <!-- Live Preview -->
+                            <div class="bg-gray-50">
+                                <div class="bg-gray-100 px-3 py-2 text-xs text-gray-600 border-b border-gray-200 flex items-center justify-between">
+                                    <span>实时预览</span>
+                                    <span class="text-green-600" id="sync-status">✓ 同步</span>
+                                </div>
+                                <div id="markdown-preview" class="p-4 h-full overflow-auto prose prose-sm max-w-none">
+                                    <div class="text-gray-400 text-center py-8">
+                                        <i class="fas fa-eye text-2xl mb-2"></i>
+                                        <p>在左侧输入Markdown内容，这里会实时显示预览效果</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     {% if form.content.errors %}
-                        <div class="mt-1 text-sm text-red-600">
+                        <div class="mt-2 text-sm text-red-600">
                             {% for error in form.content.errors %}
                                 <i class="fas fa-exclamation-circle mr-1"></i>{{ error }}
                             {% endfor %}
@@ -61,5 +120,295 @@
 
 {% block scripts %}
 {{ super() }}
-{{ pagedown.include_pagedown() }}
+<!-- marked.js for Markdown parsing -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+<!-- Enhanced Markdown Editor Script -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const markdownEditor = document.getElementById('markdown-editor');
+    const markdownPreview = document.getElementById('markdown-preview');
+    const syncStatus = document.getElementById('sync-status');
+
+    if (markdownEditor && markdownPreview) {
+        // Configure marked for better formatting
+        marked.setOptions({
+            breaks: true,
+            gfm: true,
+            headerIds: false,
+            mangle: false,
+            sanitize: false,
+            smartLists: true,
+            smartypants: true
+        });
+
+        let updateTimeout;
+
+        // Function to update preview with debounce
+        function updatePreview() {
+            const markdownText = markdownEditor.value;
+
+            // Update sync status
+            syncStatus.textContent = '⟳ 更新中...';
+            syncStatus.className = 'text-yellow-600';
+
+            if (markdownText.trim() === '') {
+                markdownPreview.innerHTML = `
+                    <div class="text-gray-400 text-center py-8">
+                        <i class="fas fa-eye text-2xl mb-2"></i>
+                        <p>在左侧输入Markdown内容，这里会实时显示预览效果</p>
+                    </div>
+                `;
+                syncStatus.textContent = '✓ 同步';
+                syncStatus.className = 'text-green-600';
+            } else {
+                // Convert markdown to HTML with error handling
+                try {
+                    const htmlContent = marked.parse(markdownText);
+                    markdownPreview.innerHTML = htmlContent;
+                    syncStatus.textContent = '✓ 同步';
+                    syncStatus.className = 'text-green-600';
+                } catch (error) {
+                    markdownPreview.innerHTML = `
+                        <div class="text-red-600 text-center py-8">
+                            <i class="fas fa-exclamation-triangle text-2xl mb-2"></i>
+                            <p>Markdown解析错误: ${error.message}</p>
+                        </div>
+                    `;
+                    syncStatus.textContent = '✗ 错误';
+                    syncStatus.className = 'text-red-600';
+                }
+            }
+        }
+
+        // Update preview on input with debounce
+        markdownEditor.addEventListener('input', function() {
+            clearTimeout(updateTimeout);
+            updateTimeout = setTimeout(updatePreview, 300); // 300ms debounce
+        });
+
+        // Handle keyboard shortcuts
+        markdownEditor.addEventListener('keydown', function(e) {
+            // Ctrl/Cmd + B for bold
+            if ((e.ctrlKey || e.metaKey) && e.key === 'b') {
+                e.preventDefault();
+                formatText('**', '**');
+            }
+            // Ctrl/Cmd + I for italic
+            else if ((e.ctrlKey || e.metaKey) && e.key === 'i') {
+                e.preventDefault();
+                formatText('*', '*');
+            }
+            // Ctrl/Cmd + K for link
+            else if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                formatText('[', '](url)');
+            }
+            // Tab key for indentation
+            else if (e.key === 'Tab') {
+                e.preventDefault();
+                const start = markdownEditor.selectionStart;
+                const end = markdownEditor.selectionEnd;
+                const selectedText = markdownEditor.value.substring(start, end);
+                const replacement = '    ' + selectedText;
+                markdownEditor.value = markdownEditor.value.substring(0, start) + replacement + markdownEditor.value.substring(end);
+                markdownEditor.setSelectionRange(start + 4, start + 4 + selectedText.length);
+                updatePreview();
+            }
+        });
+
+        // Initial preview update
+        updatePreview();
+
+        // Handle window resize for better responsive behavior
+        window.addEventListener('resize', function() {
+            setTimeout(updatePreview, 100);
+        });
+    }
+});
+
+// Global functions for toolbar buttons
+function formatText(before, after) {
+    const textarea = document.getElementById('markdown-editor');
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = textarea.value.substring(start, end);
+    const replacement = before + selectedText + after;
+
+    textarea.value = textarea.value.substring(0, start) + replacement + textarea.value.substring(end);
+
+    // Set cursor position
+    const cursorPosition = selectedText ? start + before.length + selectedText.length : start + before.length;
+    textarea.setSelectionRange(cursorPosition, cursorPosition);
+
+    // Trigger input event to update preview
+    textarea.dispatchEvent(new Event('input'));
+
+    // Keep focus
+    textarea.focus();
+}
+
+function insertTable() {
+    const textarea = document.getElementById('markdown-editor');
+    const tableTemplate = '\n| 列1 | 列2 | 列3 |\n|-----|-----|-----|\n| 数据1 | 数据2 | 数据3 |\n| 数据4 | 数据5 | 数据6 |\n';
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const replacement = tableTemplate;
+
+    textarea.value = textarea.value.substring(0, start) + replacement + textarea.value.substring(end);
+    textarea.setSelectionRange(start + 1, start + 1); // Position cursor after first newline
+
+    // Trigger input event to update preview
+    textarea.dispatchEvent(new Event('input'));
+
+    // Keep focus
+    textarea.focus();
+}
+</script>
+
+<style>
+/* Enhanced Markdown Editor Styles */
+#markdown-editor {
+    border: none;
+    resize: none;
+    outline: none;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    line-height: 1.5;
+}
+
+#markdown-preview {
+    line-height: 1.6;
+}
+
+/* Toolbar button styles */
+.toolbar button {
+    transition: all 0.2s ease;
+}
+
+.toolbar button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.toolbar button:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+/* Sync status animation */
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+#sync-status {
+    transition: all 0.3s ease;
+}
+
+#sync-status.text-yellow-600 {
+    animation: pulse 1s infinite;
+}
+
+/* Markdown preview styles */
+.prose {
+    color: #374151;
+}
+
+.prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+    color: #111827;
+    font-weight: 600;
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+}
+
+.prose h1 { font-size: 1.5em; }
+.prose h2 { font-size: 1.25em; }
+.prose h3 { font-size: 1.125em; }
+
+.prose p {
+    margin-bottom: 1em;
+}
+
+.prose ul, .prose ol {
+    margin-bottom: 1em;
+    padding-left: 1.5em;
+}
+
+.prose li {
+    margin-bottom: 0.25em;
+}
+
+.prose blockquote {
+    border-left: 4px solid #e5e7eb;
+    margin: 1em 0;
+    padding-left: 1em;
+    color: #6b7280;
+    font-style: italic;
+}
+
+.prose code {
+    background-color: #f3f4f6;
+    color: #dc2626;
+    padding: 0.125em 0.25em;
+    border-radius: 0.25rem;
+    font-size: 0.875em;
+}
+
+.prose pre {
+    background-color: #f3f4f6;
+    border-radius: 0.375rem;
+    padding: 0.75em;
+    overflow-x: auto;
+    margin-bottom: 1em;
+}
+
+.prose pre code {
+    background-color: transparent;
+    color: inherit;
+    padding: 0;
+}
+
+.prose a {
+    color: #3b82f6;
+    text-decoration: underline;
+}
+
+.prose a:hover {
+    color: #2563eb;
+}
+
+.prose table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1em;
+}
+
+.prose th, .prose td {
+    border: 1px solid #e5e7eb;
+    padding: 0.5em;
+    text-align: left;
+}
+
+.prose th {
+    background-color: #f9fafb;
+    font-weight: 600;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+    .grid-cols-1.lg\\:grid-cols-2 {
+        grid-template-columns: 1fr;
+    }
+
+    .border-r {
+        border-right: none;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    #markdown-editor, #markdown-preview {
+        min-height: 300px;
+    }
+}
+</style>
 {% endblock %}

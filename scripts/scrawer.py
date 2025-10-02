@@ -31,14 +31,21 @@ response = session.get(initial_url, headers=headers)
 if response.status_code == 200:
     # 解析初始页面
     soup = BeautifulSoup(response.text, 'html.parser')
-    print(soup)
+    print("Successfully retrieved the page content")
 
     # 提取 'security' 参数
     security_input = soup.find('input', {'id': 'divi_filter_security'})
     if security_input:
         security_value = security_input['value']
+        print("Found security parameter")
     else:
         print("未找到 'security' 参数")
+        # 尝试查找所有可能的security相关输入
+        all_inputs = soup.find_all('input')
+        security_inputs = [inp for inp in all_inputs if 'security' in inp.get('id', '').lower() or 'security' in inp.get('name', '').lower()]
+        print(f"Found {len(security_inputs)} security-related inputs:")
+        for inp in security_inputs:
+            print(f"  ID: {inp.get('id', 'N/A')}, Name: {inp.get('name', 'N/A')}")
         exit()
 
     # 提取 'query' 参数
@@ -55,6 +62,7 @@ if response.status_code == 200:
     if not query_value:
         print("未找到 'query' 参数")
         exit()
+    print("Found query parameter")
 else:
     print("无法访问初始页面")
     exit()

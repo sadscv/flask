@@ -28,14 +28,73 @@
                     {% endif %}
                 </div>
 
-                <!-- Content Field -->
+                <!-- Content Field with Enhanced Markdown Editor -->
                 <div>
                     <label for="content" class="block text-sm font-medium text-gray-700 mb-2">
-                        <i class="fas fa-file-alt text-gray-400 mr-2"></i>正文
+                        <i class="fas fa-edit text-gray-400 mr-2"></i>正文内容 (Markdown)
                     </label>
-                    {{ form.content(class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 min-h-[400px]", rows="20", required="") }}
+
+                    <!-- Enhanced Editor Container -->
+                    <div class="border border-gray-300 rounded-lg overflow-hidden">
+                        <!-- Toolbar -->
+                        <div class="bg-gray-50 border-b border-gray-200 p-3 flex flex-wrap gap-2">
+                            <button type="button" onclick="formatText('**', '**')" class="px-3 py-1 text-sm bg-white border border-gray-300 rounded hover:bg-gray-100 transition-colors" title="粗体 (Ctrl+B)">
+                                <strong>B</strong>
+                            </button>
+                            <button type="button" onclick="formatText('*', '*')" class="px-3 py-1 text-sm bg-white border border-gray-300 rounded hover:bg-gray-100 transition-colors" title="斜体 (Ctrl+I)">
+                                <em>I</em>
+                            </button>
+                            <button type="button" onclick="formatText('`', '`')" class="px-3 py-1 text-sm bg-white border border-gray-300 rounded hover:bg-gray-100 transition-colors" title="代码">
+                                <code>&lt;/&gt;</code>
+                            </button>
+                            <button type="button" onclick="formatText('# ', '')" class="px-3 py-1 text-sm bg-white border border-gray-300 rounded hover:bg-gray-100 transition-colors" title="标题">
+                                H
+                            </button>
+                            <button type="button" onclick="formatText('> ', '')" class="px-3 py-1 text-sm bg-white border border-gray-300 rounded hover:bg-gray-100 transition-colors" title="引用">
+                                ❝
+                            </button>
+                            <button type="button" onclick="formatText('- ', '')" class="px-3 py-1 text-sm bg-white border border-gray-300 rounded hover:bg-gray-100 transition-colors" title="列表">
+                                •
+                            </button>
+                            <button type="button" onclick="formatText('[', '](url)')" class="px-3 py-1 text-sm bg-white border border-gray-300 rounded hover:bg-gray-100 transition-colors" title="链接 (Ctrl+K)">
+                                🔗
+                            </button>
+                            <button type="button" onclick="insertTable()" class="px-3 py-1 text-sm bg-white border border-gray-300 rounded hover:bg-gray-100 transition-colors" title="表格">
+                                ⊞
+                            </button>
+                            <div class="ml-auto text-xs text-gray-500">
+                                Ctrl+B 粗体 | Ctrl+I 斜体 | Ctrl+K 链接
+                            </div>
+                        </div>
+
+                        <!-- Split Editor Layout -->
+                        <div class="grid grid-cols-1 lg:grid-cols-2 h-[500px]">
+                            <!-- CodeMirror Editor -->
+                            <div class="border-r border-gray-200">
+                                <div class="bg-gray-100 px-3 py-2 text-xs text-gray-600 border-b border-gray-200">
+                                    Markdown 源码
+                                </div>
+                                {{ form.content(class="w-full h-full p-4 font-mono text-sm resize-none focus:outline-none", id="markdown-editor", rows="20", required="") }}
+                            </div>
+
+                            <!-- Live Preview -->
+                            <div class="bg-gray-50">
+                                <div class="bg-gray-100 px-3 py-2 text-xs text-gray-600 border-b border-gray-200 flex items-center justify-between">
+                                    <span>实时预览</span>
+                                    <span class="text-green-600" id="sync-status">✓ 同步</span>
+                                </div>
+                                <div id="markdown-preview" class="p-4 h-full overflow-auto prose prose-sm max-w-none">
+                                    <div class="text-gray-400 text-center py-8">
+                                        <i class="fas fa-eye text-2xl mb-2"></i>
+                                        <p>在左侧输入Markdown内容，这里会实时显示预览效果</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     {% if form.content.errors %}
-                        <div class="mt-1 text-sm text-red-600">
+                        <div class="mt-2 text-sm text-red-600">
                             {% for error in form.content.errors %}
                                 <i class="fas fa-exclamation-circle mr-1"></i>{{ error }}
                             {% endfor %}
@@ -61,5 +120,109 @@
 
 {% block scripts %}
 {{ super() }}
-{{ pagedown.include_pagedown() }}
+<!-- Toast UI Editor CSS -->
+<link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css" />
+<link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/theme/toastui-editor-dark.min.css" />
+
+<!-- Toast UI Editor JavaScript -->
+<script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
+
+<!-- Custom Toast UI Editor Integration -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const contentField = document.getElementById('content-field');
+    const editorContainer = document.getElementById('editor');
+
+    if (contentField && editorContainer) {
+        // Initialize Toast UI Editor
+        const editor = new toastui.Editor({
+            el: editorContainer,
+            height: '500px',
+            initialEditType: 'markdown',
+            previewStyle: 'vertical',
+            initialValue: contentField.value || '',
+            placeholder: '开始编写你的文章内容...',
+            theme: 'light',
+            usageStatistics: false,
+            hideModeSwitch: false,
+            toolbarItems: [
+                ['heading', 'bold', 'italic', 'strike'],
+                ['hr', 'quote'],
+                ['ul', 'ol', 'task', 'indent', 'outdent'],
+                ['table', 'image', 'link'],
+                ['code', 'codeblock'],
+                ['scrollsync']
+            ],
+            hooks: {
+                change: function() {
+                    // Sync editor content to hidden textarea
+                    contentField.value = editor.getMarkdown();
+                }
+            }
+        });
+
+        // Set initial content from form field
+        if (contentField.value) {
+            editor.setMarkdown(contentField.value);
+        }
+
+        // Sync on form submission
+        const form = contentField.closest('form');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                contentField.value = editor.getMarkdown();
+            });
+        }
+    }
+});
+</script>
+
+<style>
+/* Custom styles for Toast UI Editor integration */
+#editor {
+    min-height: 500px;
+}
+
+/* Override some default styles to match our theme */
+.toastui-editor-defaultUI {
+    border: none;
+    border-radius: 0.375rem;
+}
+
+.toastui-editor-md-tabs .tab-item {
+    color: #6b7280;
+}
+
+.toastui-editor-md-tabs .tab-item.active {
+    color: #3b82f6;
+    border-bottom: 2px solid #3b82f6;
+}
+
+.toastui-editor-toolbar-icons {
+    background-color: #f9fafb;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.toastui-editor-toolbar-icons button:hover {
+    background-color: #f3f4f6;
+}
+
+.toastui-editor-toolbar-icons button.active {
+    background-color: #dbeafe;
+    color: #1d4ed8;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .toastui-editor-defaultUI {
+        background-color: #1f2937;
+        color: #f9fafb;
+    }
+
+    .toastui-editor-md-preview {
+        background-color: #111827;
+        color: #f9fafb;
+    }
+}
+</style>
 {% endblock %}

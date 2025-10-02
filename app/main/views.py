@@ -10,11 +10,11 @@ from werkzeug.utils import secure_filename
 
 from app import db
 from app.decorator import admin_required
-from app.models import Post, Permission, User, Role
+from app.models import Post, Permission, User, Role, Thought
 from . import main
 from datetime import datetime as dt
 from .forms import PostForm, EditProfileForm, EditProfileAdminForm, \
-                    FileUploadForm
+                    FileUploadForm, ThoughtForm
 
 
 #主页
@@ -22,11 +22,17 @@ from .forms import PostForm, EditProfileForm, EditProfileAdminForm, \
 def index():
     page = request.args.get('page', 1, type=int)
     pagination = Post.query.order_by(Post.timestamp.desc()).paginate(
-        page, per_page=current_app.config['FLASK_POST_PER_PAGE'],
+        page=page, per_page=current_app.config['FLASK_POST_PER_PAGE'],
         error_out=False)
     posts = pagination.items
+
+    # 获取最新的想法（最多10个）
+    recent_thoughts = Thought.query.filter_by(is_deleted=False, is_public=True)\
+        .order_by(Thought.timestamp.desc())\
+        .limit(10).all()
+
     return render_template('index.html', posts=posts,
-                           pagination=pagination)
+                           pagination=pagination, recent_thoughts=recent_thoughts)
 
 
 
@@ -137,6 +143,80 @@ def edit_profile_admin(id):
     return render_template('edit_profile.html', form=form, user=user)
 
 
+
+
+#想法记录页面
+@main.route('/thoughts', methods=['GET', 'POST'])
+@login_required
+def thoughts():
+    form = ThoughtForm()
+    if form.validate_on_submit():
+        thought = Thought(
+            content=form.content.data,
+            author=current_user._get_current_object(),
+            tags=form.tags.data,
+            thought_type=form.thought_type.data,
+            source_url=form.source_url.data,
+            is_public=form.is_public.data
+        )
+        db.session.add(thought)
+        db.session.commit()
+        flash('想法已记录！')
+        return redirect(url_for('.thoughts'))
+
+    # 分页显示想法
+    page = request.args.get('page', 1, type=int)
+    pagination = Thought.query.filter_by(is_deleted=False)\
+        .filter_by(is_public=True)\
+        .order_by(Thought.timestamp.desc())\
+        .paginate(page=page, per_page=20, error_out=False)
+    thoughts = pagination.items
+    return render_template('thoughts.html', form=form,
+                         thoughts=thoughts, pagination=pagination)
+
+
+#删除想法（软删除）
+@main.route('/thought/<int:id>/delete', methods=['POST'])
+@login_required
+def delete_thought(id):
+    thought = Thought.query.get_or_404(id)
+    if thought.author != current_user:
+        abort(403)
+    thought.is_deleted = True
+    db.session.add(thought)
+    db.session.commit()
+    flash('想法已删除')
+    return redirect(url_for('.thoughts'))
+
+
+#按标签筛选想法
+@main.route('/thoughts/tag/<tag>')
+def thoughts_by_tag(tag):
+    page = request.args.get('page', 1, type=int)
+    pagination = Thought.query.filter(Thought.tags.contains(tag))\
+        .filter_by(is_deleted=False, is_public=True)\
+        .order_by(Thought.timestamp.desc())\
+        .paginate(page=page, per_page=20, error_out=False)
+    thoughts = pagination.items
+    return render_template('thoughts_tag.html', thoughts=thoughts,
+                         tag=tag, pagination=pagination)
+
+
+#搜索想法
+@main.route('/thoughts/search')
+def search_thoughts():
+    query = request.args.get('q', '')
+    if not query:
+        return redirect(url_for('.thoughts'))
+
+    page = request.args.get('page', 1, type=int)
+    pagination = Thought.query.filter(Thought.content.contains(query))\
+        .filter_by(is_deleted=False, is_public=True)\
+        .order_by(Thought.timestamp.desc())\
+        .paginate(page=page, per_page=20, error_out=False)
+    thoughts = pagination.items
+    return render_template('thoughts_search.html', thoughts=thoughts,
+                         query=query, pagination=pagination)
 
 
 #上传页面

@@ -14,16 +14,16 @@
                             </a>
                             <div class="text-sm text-gray-500">
                                 {% if post.edit_date %}
-                                    <i class="fas fa-edit mr-1"></i>{{ moment(post.edit_date).fromNow() }} edited
+                                    <i class="fas fa-edit mr-1"></i>{{ moment(post.edit_date).format('YYYY-MM-DD HH:mm') }} 编辑
                                 {% else %}
-                                    <i class="fas fa-clock mr-1"></i>{{ moment(post.timestamp).fromNow() }}
+                                    <i class="fas fa-clock mr-1"></i>{{ moment(post.timestamp).format('YYYY-MM-DD HH:mm') }}
                                 {% endif %}
                             </div>
                         </div>
                     </div>
 
                     <!-- Post Content -->
-                    <div class="prose prose-sm max-w-none mb-4">
+                    <div class="prose prose-sm max-w-prose mb-4">
                         {% if post.body_html %}
                             {{ post.body_html | safe }}
                         {% else %}

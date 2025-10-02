@@ -3,7 +3,13 @@
     "allow": [
       "Bash(cat:*)",
       "Bash(pip install:*)",
-      "Bash(python manage.py runserver:*)"
+      "Bash(python manage.py runserver:*)",
+      "Bash(pip uninstall:*)",
+      "Bash(flask:*)",
+      "Bash(python:*)",
+      "WebSearch",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)"
     ],
     "deny": [],
     "ask": []

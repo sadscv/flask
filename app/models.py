@@ -18,7 +18,8 @@ class Permission:
     COMMENT = 0x02
     WRITE_ARTICLES = 0x04
     MODERATE_COMMENTS = 0X08
-    ADMIN = 0x08
+    WRITE_THOUGHTS = 0x10
+    ADMIN = 0x80
 
 
 class User(UserMixin, db.Model):
@@ -38,6 +39,7 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(64), unique=True, index=True)
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
     posts = db.relationship('Post', backref='author', lazy='dynamic')
+    thoughts = db.relationship('Thought', backref='author', lazy='dynamic')
     name = db.Column(db.String(64))
     location = db.Column(db.String(64))
     about_me = db.Column(db.Text())
@@ -149,10 +151,12 @@ class Role(db.Model):
         roles = {
             'User' : (Permission.FOLLOW|
                       Permission.COMMENT|
-                      Permission.WRITE_ARTICLES, True),
+                      Permission.WRITE_ARTICLES|
+                      Permission.WRITE_THOUGHTS, True),
             'Moderator' : (Permission.FOLLOW|
                            Permission.COMMENT|
                            Permission.WRITE_ARTICLES|
+                           Permission.WRITE_THOUGHTS|
                            Permission.MODERATE_COMMENTS, False),
             'Admin' : (0xff, False)
         }
@@ -226,4 +230,77 @@ class Post(db.Model):
     def __repr__(self):
         return '<Post %s>' % self.id
 
+class Thought(db.Model):
+    __tablename__ = 'thoughts'
+    id = db.Column(db.Integer, primary_key=True)
+    content = db.Column(db.String(500))
+    content_html = db.Column(db.Text)
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    tags = db.Column(db.String(200))
+    is_public = db.Column(db.Boolean, default=True)
+    is_deleted = db.Column(db.Boolean, default=False)
+    thought_type = db.Column(db.String(20), default='note')
+    source_url = db.Column(db.String(500))
+
+    def to_json(self):
+        json_thought = {
+            'url': url_for('api.get_thought', id=self.id, _external=True),
+            'content': self.content,
+            'content_html': self.content_html,
+            'timestamp': self.timestamp,
+            'author': self.author.username,
+            'tags': self.tags.split(',') if self.tags else [],
+            'thought_type': self.thought_type,
+            'source_url': self.source_url,
+            'is_public': self.is_public
+        }
+        return json_thought
+
+    @staticmethod
+    def generate_fake(count=100):
+        from random import seed, randint
+        import forgery_py
+
+        seed()
+        user_count = User.query.count()
+        thought_types = ['note', 'quote', 'idea', 'task']
+
+        for i in range(count):
+            u = User.query.offset(randint(0, user_count - 1)).first()
+            thought = Thought(
+                content=forgery_py.lorem_ipsum.sentence(randint(5, 15)),
+                timestamp=forgery_py.date.date(True),
+                author=u,
+                thought_type=randint(0, 3),
+                is_public=randint(0, 1) == 1
+            )
+            db.session.add(thought)
+        db.session.commit()
+
+    @staticmethod
+    def on_changed_content(target, value, oldvalue, initiator):
+        allowed_tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code',
+                        'em', 'i', 'li', 'ol', 'pre', 'strong', 'ul',
+                        'h1', 'h2', 'h3', 'p', 'br', 'span']
+        target.content_html = bleach.linkify(markdown(value, output_format='html'))
+
+    @staticmethod
+    def from_json(json_thought):
+        content = json_thought.get('content')
+        if content is None or content == '':
+            raise ValidationError('thought does not have content')
+        return Thought(
+            content=content,
+            tags=json_thought.get('tags', ''),
+            thought_type=json_thought.get('thought_type', 'note'),
+            source_url=json_thought.get('source_url', ''),
+            is_public=json_thought.get('is_public', True)
+        )
+
+    def __repr__(self):
+        return '<Thought %s>' % self.id
+
+
 db.event.listen(Post.body, 'set', Post.on_changed_body)
+db.event.listen(Thought.content, 'set', Thought.on_changed_content)

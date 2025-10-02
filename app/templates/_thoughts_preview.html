@@ -1,0 +1,78 @@
+<!-- 最新想法预览 - 侧边栏版本 -->
+<div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-200 p-4 h-full">
+    <div class="flex items-center justify-between mb-3">
+        <h3 class="text-lg font-bold text-gray-900 flex items-center">
+            <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>
+            最新想法
+        </h3>
+        <a href="{{ url_for('main.thoughts') }}" class="text-blue-600 hover:text-blue-800 text-sm">
+            <i class="fas fa-arrow-right"></i>
+        </a>
+    </div>
+
+    <div class="space-y-2 max-h-96 overflow-y-auto">
+        {% for thought in recent_thoughts %}
+        <div class="bg-white rounded-lg p-3 border border-gray-200 hover:border-blue-300 hover:shadow-sm transition-all duration-200 cursor-pointer"
+             onclick="window.location.href='{{ url_for('main.thoughts') }}'">
+            <div class="flex items-center mb-2">
+                <span class="px-1.5 py-0.5 text-xs font-medium rounded-full {% if thought.thought_type == 'note' %}bg-blue-100 text-blue-800
+                {% elif thought.thought_type == 'quote' %}bg-green-100 text-green-800
+                {% elif thought.thought_type == 'idea' %}bg-purple-100 text-purple-800
+                {% elif thought.thought_type == 'task' %}bg-orange-100 text-orange-800
+                {% endif %}">
+                    {% if thought.thought_type == 'note' %}笔记
+                    {% elif thought.thought_type == 'quote' %}引用
+                    {% elif thought.thought_type == 'idea' %}想法
+                    {% elif thought.thought_type == 'task' %}任务
+                    {% endif %}
+                </span>
+                <span class="text-xs text-gray-500 ml-2">
+                    {{ thought.timestamp.strftime('%m-%d %H:%M') }}
+                </span>
+            </div>
+
+            <div class="text-sm text-gray-700 line-clamp-3 leading-relaxed">
+                {% if thought.content_html %}
+                    {{ thought.content_html|safe }}
+                {% else %}
+                    {{ thought.content }}
+                {% endif %}
+            </div>
+
+            {% if thought.tags %}
+            <div class="flex flex-wrap gap-1 mt-2">
+                {% for tag in thought.tags.split(',')[:2] %}
+                {% if tag.strip() %}
+                <a href="{{ url_for('main.thoughts_by_tag', tag=tag.strip()) }}"
+                   onclick="event.stopPropagation()"
+                   class="inline-block px-1 py-0.5 text-xs bg-gray-100 text-gray-600 rounded hover:bg-gray-200">
+                    #{{ tag.strip() }}
+                </a>
+                {% endif %}
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if not recent_thoughts %}
+    <div class="text-center py-6">
+        <i class="fas fa-lightbulb text-3xl text-gray-300 mb-2"></i>
+        <p class="text-gray-500 text-sm">还没有想法记录</p>
+        {% if current_user.is_authenticated %}
+        <a href="{{ url_for('main.thoughts') }}" class="text-blue-600 hover:text-blue-800 text-sm font-medium mt-2 inline-block">
+            记录第一个想法 <i class="fas fa-plus ml-1"></i>
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% if recent_thoughts %}
+    <div class="mt-3 pt-3 border-t border-blue-100">
+        <a href="{{ url_for('main.thoughts') }}" class="text-blue-600 hover:text-blue-800 text-sm font-medium text-center block">
+            查看所有想法 <i class="fas fa-arrow-right ml-1"></i>
+        </a>
+    </div>
+    {% endif %}
+</div>
