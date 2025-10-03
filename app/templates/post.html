@@ -54,36 +54,16 @@
                     <div class="flex items-center space-x-6 text-sm text-gray-500">
                         <span class="flex items-center">
                             <i class="fas fa-eye mr-1"></i>
-                            阅读 {{ post.id }}
+                            阅读 {{ post.views or 0 }}
                         </span>
                         <span class="flex items-center">
                             <i class="fas fa-comment mr-1"></i>
-                            评论 0
-                        </span>
-                        <span class="flex items-center">
-                            <i class="fas fa-heart mr-1"></i>
-                            点赞 0
+                            评论 {{ post.comments.count() if post.comments else 0 }}
                         </span>
                     </div>
 
                     <!-- Action Buttons -->
                     <div class="flex items-center space-x-3">
-                        {% if current_user.is_anonymous %}
-                            <button class="text-gray-500 hover:text-blue-600 transition-colors duration-200" disabled>
-                                <i class="fas fa-heart mr-1"></i>点赞
-                            </button>
-                            <button class="text-gray-500 hover:text-blue-600 transition-colors duration-200" disabled>
-                                <i class="fas fa-bookmark mr-1"></i>收藏
-                            </button>
-                        {% else %}
-                            <button class="text-gray-500 hover:text-red-600 transition-colors duration-200">
-                                <i class="fas fa-heart mr-1"></i>点赞
-                            </button>
-                            <button class="text-gray-500 hover:text-blue-600 transition-colors duration-200">
-                                <i class="fas fa-bookmark mr-1"></i>收藏
-                            </button>
-                        {% endif %}
-
                         {% if current_user.is_administrator() %}
                             <a href="{{ url_for('.edit_post', id=post.id) }}" class="text-green-600 hover:text-green-800 transition-colors duration-200">
                                 <i class="fas fa-edit mr-1"></i>编辑
@@ -113,14 +93,20 @@
             {% if current_user.is_authenticated %}
             <div class="mb-8">
                 <h3 class="text-lg font-medium text-gray-900 mb-4">发表评论</h3>
-                <form class="space-y-4">
+                <form method="POST" class="space-y-4">
+                    {{ form.hidden_tag() }}
                     <div>
-                        <textarea class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200" rows="4" placeholder="写下你的评论..."></textarea>
+                        {{ form.body(class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200", rows="4", placeholder="写下你的评论...") }}
+                        {% if form.body.errors %}
+                            <div class="mt-1 text-sm text-red-600">
+                                {% for error in form.body.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
                     </div>
                     <div class="flex justify-end">
-                        <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                            <i class="fas fa-paper-plane mr-2"></i>发表评论
-                        </button>
+                        {{ form.submit(class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2") }}
                     </div>
                 </form>
             </div>
@@ -139,14 +125,42 @@
             </div>
             {% endif %}
 
-            <!-- Comments List (Empty State) -->
-            <div class="text-center py-12">
-                <div class="mb-4">
-                    <i class="fas fa-comment-slash text-6xl text-gray-300"></i>
+            <!-- Comments List -->
+            {% if comments %}
+                <div class="space-y-6">
+                    {% for comment in comments %}
+                    <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                        <div class="flex items-start space-x-4">
+                            <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">
+                                {{ comment.author.username[0].upper() }}
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center mb-2">
+                                    <span class="font-medium text-gray-900">{{ comment.author.username }}</span>
+                                    <span class="ml-2 text-sm text-gray-500">{{ moment(comment.timestamp).fromNow() }}</span>
+                                </div>
+                                <div class="prose prose-sm max-w-none">
+                                    {% if comment.body_html %}
+                                        {{ comment.body_html | safe }}
+                                    {% else %}
+                                        <p class="text-gray-700 whitespace-pre-wrap">{{ comment.body }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
                 </div>
-                <h3 class="text-xl font-semibold text-gray-900 mb-2">暂无评论</h3>
-                <p class="text-gray-500">成为第一个发表评论的人吧！</p>
-            </div>
+            {% else %}
+                <!-- Empty State -->
+                <div class="text-center py-12">
+                    <div class="mb-4">
+                        <i class="fas fa-comment-slash text-6xl text-gray-300"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">暂无评论</h3>
+                    <p class="text-gray-500">成为第一个发表评论的人吧！</p>
+                </div>
+            {% endif %}
         </div>
     {% else %}
         <!-- Post Not Found -->

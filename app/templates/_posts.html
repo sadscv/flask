@@ -23,7 +23,7 @@
                     </div>
 
                     <!-- Post Content -->
-                    <div class="prose prose-sm max-w-prose mb-4">
+                    <div class="prose prose-sm max-w-none mb-4 overflow-wrap-break-word">
                         {% if post.body_html %}
                             {{ post.body_html | safe }}
                         {% else %}
@@ -32,27 +32,39 @@
                     </div>
 
                     <!-- Post Footer -->
-                    <div class="flex justify-end">
+                    <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
+                        <!-- Post Stats -->
+                        <div class="flex items-center space-x-4 text-sm text-gray-500">
+                            <span class="flex items-center">
+                                <i class="fas fa-eye mr-1"></i>
+                                {{ post.views or 0 }}
+                            </span>
+                            <span class="flex items-center">
+                                <i class="fas fa-comment mr-1"></i>
+                                {{ post.comments.count() if post.comments else 0 }}
+                            </span>
+                        </div>
+
                         <!-- Action Buttons -->
                         <div class="flex items-center space-x-2">
                             {% if current_user.is_anonymous %}
                                 <a href="{{ url_for('.post', id=post.id) }}" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
-                                    <i class="fas fa-external-link-alt mr-1"></i>Permalink
+                                    <i class="fas fa-external-link-alt mr-1"></i>阅读全文
                                 </a>
                             {% endif %}
 
                             {% if current_user.is_administrator() %}
                                 <a href="{{ url_for('.edit_post', id=post.id) }}" class="text-green-600 hover:text-green-800 text-sm font-medium">
-                                    <i class="fas fa-edit mr-1"></i>Edit
+                                    <i class="fas fa-edit mr-1"></i>编辑
                                 </a>
                                 <a href="{{ url_for('.delete_post', id=post.id) }}"
-                                   onclick="return confirm('delete?')"
+                                   onclick="return confirm('确定要删除这篇文章吗？')"
                                    class="text-red-600 hover:text-red-800 text-sm font-medium">
-                                    <i class="fas fa-trash mr-1"></i>Delete
+                                    <i class="fas fa-trash mr-1"></i>删除
                                 </a>
                             {% elif current_user == post.author %}
                                 <a href="{{ url_for('.edit_post', id=post.id) }}" class="text-green-600 hover:text-green-800 text-sm font-medium">
-                                    <i class="fas fa-edit mr-1"></i>Edit
+                                    <i class="fas fa-edit mr-1"></i>编辑
                                 </a>
                             {% endif %}
                         </div>

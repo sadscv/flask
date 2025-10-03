@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+{% from datetime import timedelta %}
+
+{% block title %}心情详情{% endblock %}
+
+{% block page_content %}
+<div class="max-w-4xl mx-auto px-4 py-8">
+    <!-- 返回按钮 -->
+    <div class="mb-6">
+        <a href="{{ url_for('main.mood_history') }}"
+           class="inline-flex items-center text-gray-600 hover:text-gray-800 transition-colors">
+            <i class="fas fa-arrow-left mr-2"></i>
+            返回心情历史
+        </a>
+    </div>
+
+    <!-- 心情详情卡片 -->
+    <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-purple-100">
+        <!-- 头部 -->
+        <div class="bg-gradient-to-r from-purple-100 via-pink-100 to-blue-100 p-8">
+            <div class="text-center">
+                <div class="text-6xl mb-4">
+                    {% if mood.mood_type != 'custom' %}
+                        {{ Mood.MOOD_CONFIG[mood.mood_type].icon }}
+                    {% else %}
+                        💭
+                    {% endif %}
+                </div>
+                <h1 class="text-3xl font-light text-gray-800 mb-2">
+                    {% if mood.mood_type != 'custom' %}
+                        {{ Mood.MOOD_CONFIG[mood.mood_type].label }}
+                    {% else %}
+                        {{ mood.custom_mood }}
+                    {% endif %}
+                </h1>
+                <p class="text-gray-600">
+                    {{ moment(mood.timestamp).format('YYYY年MM月DD日 HH:mm') }}
+                </p>
+            </div>
+        </div>
+
+        <!-- 内容 -->
+        <div class="p-8">
+            <!-- 心情强度 -->
+            <div class="mb-8">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-tachometer-alt text-purple-500 mr-2"></i>
+                    心情强度
+                </h3>
+                <div class="flex items-center">
+                    <div class="flex-1 max-w-md">
+                        <div class="w-full bg-gray-200 rounded-full h-4">
+                            <div class="bg-gradient-to-r from-blue-400 to-purple-400 h-4 rounded-full transition-all duration-500"
+                                 style="width: {{ mood.intensity * 10 }}%"></div>
+                        </div>
+                    </div>
+                    <span class="ml-4 text-2xl font-bold text-purple-600">{{ mood.intensity }}/10</span>
+                </div>
+                <p class="text-gray-500 text-sm mt-2">
+                    {% if mood.intensity <= 3 %}
+                        轻微的情绪波动
+                    {% elif mood.intensity <= 6 %}
+                        中等程度的情绪体验
+                    {% else %}
+                        强烈的情绪感受
+                    {% endif %}
+                </p>
+            </div>
+
+            <!-- 日记内容 -->
+            {% if mood.diary %}
+            <div class="mb-8">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-book text-blue-500 mr-2"></i>
+                    今日日记
+                </h3>
+                <div class="bg-gray-50 rounded-xl p-6">
+                    <div class="prose prose-sm max-w-none">
+                        <p class="whitespace-pre-wrap leading-relaxed text-gray-700">{{ mood.diary }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- 相关信息 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div class="bg-blue-50 rounded-xl p-6">
+                    <h4 class="font-semibold text-gray-800 mb-3 flex items-center">
+                        <i class="fas fa-info-circle text-blue-500 mr-2"></i>
+                        记录信息
+                    </h4>
+                    <dl class="space-y-2 text-sm">
+                        <div class="flex">
+                            <dt class="text-gray-500 w-20">记录时间:</dt>
+                            <dd class="text-gray-700">{{ moment(mood.timestamp).format('MM-DD HH:mm') }}</dd>
+                        </div>
+                        <div class="flex">
+                            <dt class="text-gray-500 w-20">记录日期:</dt>
+                            <dd class="text-gray-700">{{ mood.date }}</dd>
+                        </div>
+                    </dl>
+                </div>
+
+                <div class="bg-purple-50 rounded-xl p-6">
+                    <h4 class="font-semibold text-gray-800 mb-3 flex items-center">
+                        <i class="fas fa-lightbulb text-purple-500 mr-2"></i>
+                        心情小贴士
+                    </h4>
+                    <p class="text-sm text-gray-700">
+                        {% if mood.mood_type == 'happy' %}
+                            保持这份愉悦，可以尝试分享给身边的人，让快乐加倍！
+                        {% elif mood.mood_type == 'calm' %}
+                            平静是内心的力量，继续保持这种宁静的状态。
+                        {% elif mood.mood_type == 'anxious' %}
+                            焦虑时试试深呼吸，或者进行一些轻松的运动来缓解压力。
+                        {% elif mood.mood_type == 'sad' %}
+                            允许自己感受悲伤，这也是成长的一部分。记得寻求支持和关爱。
+                        {% elif mood.mood_type == 'angry' %}
+                            愤怒是正常的情绪，试着找到健康的方式来表达和释放它。
+                        {% else %}
+                            每种情绪都有它的价值，了解并接纳自己的感受。
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+
+            <!-- 操作按钮 -->
+            <div class="flex justify-center space-x-4">
+                <a href="{{ url_for('main.mood_calendar', year=mood.date.year, month=mood.date.month) }}"
+                   class="px-6 py-3 bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-600 transition-colors duration-300">
+                    <i class="fas fa-calendar-alt mr-2"></i>
+                    查看日历
+                </a>
+                <a href="{{ url_for('main.mood_history') }}"
+                   class="px-6 py-3 bg-gray-500 text-white rounded-lg font-medium hover:bg-gray-600 transition-colors duration-300">
+                    <i class="fas fa-history mr-2"></i>
+                    查看历史
+                </a>
+                <form action="{{ url_for('main.delete_mood', id=mood.id) }}" method="post"
+                      onsubmit="return confirm('确定要删除这条心情记录吗？')" class="inline">
+                    <button type="submit"
+                            class="px-6 py-3 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition-colors duration-300">
+                        <i class="fas fa-trash mr-2"></i>
+                        删除记录
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 相邻日期导航 -->
+    <div class="mt-8 flex justify-between">
+        {% set prev_date = mood.date - timedelta(days=1) %}
+        {% set next_date = mood.date + timedelta(days=1) %}
+
+        <div class="flex-1">
+            {% if prev_date >= (current_user.moods.order_by(Mood.date.asc()).first().date or mood.date) %}
+            <a href="{{ url_for('main.mood_by_date', date_str=prev_date.isoformat()) }}"
+               class="w-full md:w-auto px-6 py-3 bg-white border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors duration-300 inline-flex items-center justify-center">
+                <i class="fas fa-chevron-left mr-2"></i>
+                前一天
+            </a>
+            {% endif %}
+        </div>
+
+        <div class="flex-1 text-right">
+            {% if next_date <= mood.date.today() %}
+            <a href="{{ url_for('main.mood_by_date', date_str=next_date.isoformat()) }}"
+               class="w-full md:w-auto px-6 py-3 bg-white border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors duration-300 inline-flex items-center justify-center">
+                后一天
+                <i class="fas fa-chevron-right ml-2"></i>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 添加进入动画
+    const card = document.querySelector('.bg-white.rounded-2xl');
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(20px)';
+
+    setTimeout(() => {
+        card.style.transition = 'all 0.6s ease-out';
+        card.style.opacity = '1';
+        card.style.transform = 'translateY(0)';
+    }, 100);
+});
+</script>
+{% endblock %}

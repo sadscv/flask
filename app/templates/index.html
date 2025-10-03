@@ -3,18 +3,32 @@
 {% block title %}Sad{% endblock %}
 
 {% block page_content %}
-<div class="bg-white rounded-lg shadow-sm p-6 mb-6">
-    <h1 class="text-3xl font-bold text-gray-900 mb-2">
-        Hello, {% if current_user.is_authenticated %}{{ current_user.username }}{% else %}Stranger{% endif %}
-    </h1>
-    <p class="text-gray-600">Welcome to the blog</p>
+<div class="bg-white rounded-lg shadow-sm p-6 mb-6 max-w-7xl mx-auto">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">
+                Hello, {% if current_user.is_authenticated %}{{ current_user.username }}{% else %}Stranger{% endif %}
+            </h1>
+            <p class="text-gray-600">Welcome to the blog</p>
+        </div>
+
+        {% if current_user.is_authenticated %}
+        <!-- 心情打卡按钮 -->
+        <a href="{{ url_for('main.mood_index') }}"
+           class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full font-medium hover:from-purple-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
+            <i class="fas fa-heart mr-2 animate-pulse"></i>
+            今日心情打卡
+        </a>
+        {% endif %}
+    </div>
 </div>
 
 <!-- 两栏布局 -->
-<div class="flex gap-6 min-h-screen">
-    <!-- 左侧：博客文章 -->
-    <div class="flex-1 max-w-3xl">
-        {% include '_posts.html' %}
+<div class="max-w-7xl mx-auto">
+    <div class="flex min-h-screen">
+        <!-- 左侧：博客文章 -->
+        <div class="flex-1 max-w-4xl">
+            {% include '_posts.html' %}
 
         <!-- 分页移到这里 -->
         {% if pagination %}
@@ -53,7 +67,7 @@
     </div>
 
     <!-- 右侧：想法展示 -->
-    <div class="w-96 lg:w-112 xl:w-128 flex flex-col flex-none">
+    <div class="ml-6" style="width: calc(1280px - 896px - 24px)">
         <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-200 p-4 flex-1 flex flex-col">
             <!-- 固定的标题区域 -->
             <div class="sticky top-6 bg-gradient-to-br from-blue-50 to-indigo-50 -m-4 p-4 mb-3 z-10 rounded-t-lg border-b border-blue-200">

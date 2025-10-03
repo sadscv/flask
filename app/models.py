@@ -40,6 +40,7 @@ class User(UserMixin, db.Model):
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
     posts = db.relationship('Post', backref='author', lazy='dynamic')
     thoughts = db.relationship('Thought', backref='author', lazy='dynamic')
+    moods = db.relationship('Mood', backref='author', lazy='dynamic')
     name = db.Column(db.String(64))
     location = db.Column(db.String(64))
     about_me = db.Column(db.Text())
@@ -182,6 +183,8 @@ class Post(db.Model):
     author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     title = db.Column('title', db.String(128))
     edit_date = db.Column('edit_date', db.DateTime)
+    views = db.Column(db.Integer, default=0)  # 阅读数
+    comments = db.relationship('Comment', backref='post', lazy='dynamic')
 
     def to_json(self):
         json_post = {
@@ -302,5 +305,132 @@ class Thought(db.Model):
         return '<Thought %s>' % self.id
 
 
+class Comment(db.Model):
+    __tablename__ = 'comments'
+    id = db.Column(db.Integer, primary_key=True)
+    body = db.Column(db.Text)
+    body_html = db.Column(db.Text)
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    post_id = db.Column(db.Integer, db.ForeignKey('Posts.id'))
+    disabled = db.Column(db.Boolean, default=False)  # 是否被禁用
+
+    def to_json(self):
+        json_comment = {
+            'url': url_for('api.get_comment', id=self.id, _external=True),
+            'body': self.body,
+            'body_html': self.body_html,
+            'timestamp': self.timestamp,
+            'author': self.author.username,
+            'post_id': self.post_id
+        }
+        return json_comment
+
+    @staticmethod
+    def on_changed_body(target, value, oldvalue, initiator):
+        allowed_tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code',
+                        'em', 'i', 'li', 'ol', 'pre', 'strong', 'ul',
+                        'h1', 'h2', 'h3', 'p']
+        target.body_html = bleach.linkify(markdown(value, output_format='html'))
+
+    def __repr__(self):
+        return '<Comment %s>' % self.id
+
+
+class Mood(db.Model):
+    __tablename__ = 'moods'
+    id = db.Column(db.Integer, primary_key=True)
+    mood_type = db.Column(db.String(20), nullable=False)  # 开心、平静、焦虑、伤心、愤怒、自定义
+    custom_mood = db.Column(db.String(50))  # 自定义心情名称
+    diary = db.Column(db.Text)  # 日记内容
+    intensity = db.Column(db.Integer, default=5)  # 心情强度 1-10
+    date = db.Column(db.Date, index=True, default=datetime.utcnow().date)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+
+    # 预定义的心情类型和对应的颜色、图标
+    MOOD_CONFIG = {
+        'happy': {'color': 'bg-yellow-100', 'text_color': 'text-yellow-800', 'icon': '😊', 'label': '开心'},
+        'calm': {'color': 'bg-blue-100', 'text_color': 'text-blue-800', 'icon': '😌', 'label': '平静'},
+        'anxious': {'color': 'bg-purple-100', 'text_color': 'text-purple-800', 'icon': '😰', 'label': '焦虑'},
+        'sad': {'color': 'bg-gray-100', 'text_color': 'text-gray-800', 'icon': '😢', 'label': '伤心'},
+        'angry': {'color': 'bg-red-100', 'text_color': 'text-red-800', 'icon': '😠', 'label': '愤怒'},
+        'custom': {'color': 'bg-green-100', 'text_color': 'text-green-800', 'icon': '💭', 'label': '自定义'}
+    }
+
+    def to_json(self):
+        return {
+            'id': self.id,
+            'mood_type': self.mood_type,
+            'custom_mood': self.custom_mood,
+            'diary': self.diary,
+            'intensity': self.intensity,
+            'date': self.date.isoformat() if self.date else None,
+            'timestamp': self.timestamp.isoformat() if self.timestamp else None,
+            'author': self.author.username
+        }
+
+    @staticmethod
+    def get_mood_stats(user_id, days=30):
+        """获取用户最近几天的心情统计"""
+        try:
+            from datetime import timedelta
+            from sqlalchemy import func
+
+            start_date = datetime.utcnow().date() - timedelta(days=days)
+
+            # 查询指定天数内的心情记录
+            try:
+                moods = Mood.query.filter(
+                    Mood.author_id == user_id,
+                    Mood.date >= start_date
+                ).all()
+            except:
+                # 如果查询失败，返回空数据
+                return {
+                    'mood_distribution': {},
+                    'daily_moods': {},
+                    'total_days': 0
+                }
+
+            # 按心情类型分组统计
+            mood_counts = {}
+            for mood in moods:
+                try:
+                    key = mood.custom_mood if mood.mood_type == 'custom' else mood.mood_type
+                    mood_counts[key] = mood_counts.get(key, 0) + 1
+                except:
+                    continue
+
+            # 按日期统计
+            daily_moods = {}
+            for mood in moods:
+                try:
+                    daily_moods[mood.date.isoformat()] = {
+                        'mood': mood.custom_mood if mood.mood_type == 'custom' else mood.mood_type,
+                        'intensity': mood.intensity or 5
+                    }
+                except:
+                    continue
+
+            return {
+                'mood_distribution': mood_counts,
+                'daily_moods': daily_moods,
+                'total_days': len(set(m.date for m in moods if hasattr(m, 'date')))
+            }
+        except Exception as e:
+            # 出现任何错误，返回安全的默认值
+            print(f"Error in get_mood_stats: {e}")
+            return {
+                'mood_distribution': {},
+                'daily_moods': {},
+                'total_days': 0
+            }
+
+    def __repr__(self):
+        return f'<Mood {self.mood_type} on {self.date}>'
+
+
 db.event.listen(Post.body, 'set', Post.on_changed_body)
 db.event.listen(Thought.content, 'set', Thought.on_changed_content)
+db.event.listen(Comment.body, 'set', Comment.on_changed_body)
