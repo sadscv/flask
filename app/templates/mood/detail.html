@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-{% from datetime import timedelta %}
 
 {% block title %}心情详情{% endblock %}
 
@@ -150,8 +149,6 @@
 
     <!-- 相邻日期导航 -->
     <div class="mt-8 flex justify-between">
-        {% set prev_date = mood.date - timedelta(days=1) %}
-        {% set next_date = mood.date + timedelta(days=1) %}
 
         <div class="flex-1">
             {% if prev_date >= (current_user.moods.order_by(Mood.date.asc()).first().date or mood.date) %}
@@ -177,7 +174,7 @@
 {% endblock %}
 
 {% block scripts %}
-{{ super() %}
+{{ super() }}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // 添加进入动画

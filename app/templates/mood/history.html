@@ -90,7 +90,10 @@
                                         {% endif %}
                                     </h3>
                                     <p class="text-sm text-gray-500">
-                                        {{ moment(mood.timestamp).format('YYYY年MM月DD日 HH:mm') }}
+                                        心情日期: {{ mood.date }}
+                                        {% if mood.timestamp %}
+                                        <span class="text-xs text-gray-400"> (记录于: {{ moment(mood.timestamp).format('MM-DD HH:mm') }})</span>
+                                        {% endif %}
                                     </p>
                                 </div>
                             </div>

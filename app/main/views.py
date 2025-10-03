@@ -31,8 +31,71 @@ def index():
         .order_by(Thought.timestamp.desc())\
         .limit(10).all()
 
+    # 获取当月心情日历数据
+    mood_calendar_data = None
+    if current_user.is_authenticated:
+        now = datetime.now()
+        year = now.year
+        month = now.month
+
+        # 获取当月第一天和最后一天
+        start_date = date(year, month, 1)
+        if month == 12:
+            end_date = date(year + 1, 1, 1) - timedelta(days=1)
+        else:
+            end_date = date(year, month + 1, 1) - timedelta(days=1)
+
+        # 获取当月所有心情记录
+        moods = Mood.query.filter_by(author_id=current_user.id)\
+            .filter(Mood.date >= start_date, Mood.date <= end_date)\
+            .order_by(Mood.date.desc())\
+            .all()
+
+        # 构建日历数据
+        calendar_data = {}
+        for mood in moods:
+            calendar_data[mood.date.day] = mood
+
+        # 预计算日期信息（避免模板中调用date函数）
+        days_info = []
+        for day in range(1, 32):
+            try:
+                day_of_week = (date(year, month, day).weekday() + 1) % 7
+                days_info.append({
+                    'day': day,
+                    'day_of_week': day_of_week,
+                    'valid': True
+                })
+            except ValueError:
+                # 无效日期（如2月30日）
+                days_info.append({
+                    'day': day,
+                    'day_of_week': 0,
+                    'valid': False
+                })
+
+        # 计算当月天数
+        if month in [1,3,5,7,8,10,12]:
+            days_in_month = 31
+        elif month in [4,6,9,11]:
+            days_in_month = 30
+        else:
+            if year % 400 == 0 or (year % 100 != 0 and year % 4 == 0):
+                days_in_month = 29
+            else:
+                days_in_month = 28
+
+        mood_calendar_data = {
+            'year': year,
+            'month': month,
+            'calendar_data': calendar_data,
+            'days_info': days_info,
+            'days_in_month': days_in_month
+        }
+
     return render_template('index.html', posts=posts,
-                           pagination=pagination, recent_thoughts=recent_thoughts)
+                           pagination=pagination, recent_thoughts=recent_thoughts,
+                           mood_calendar_data=mood_calendar_data, Mood=Mood)
 
 
 
@@ -405,7 +468,12 @@ def mood_by_date(date_str):
         flash(f'{date_str} 没有心情记录', 'info')
         return redirect(url_for('.mood_history'))
 
-    return render_template('mood/detail.html', mood=mood, Mood=Mood)
+    # 计算相邻日期
+    prev_date = mood.date - timedelta(days=1)
+    next_date = mood.date + timedelta(days=1)
+
+    return render_template('mood/detail.html', mood=mood, Mood=Mood,
+                         prev_date=prev_date, next_date=next_date)
 
 
 #删除心情记录
