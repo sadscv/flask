@@ -135,7 +135,7 @@
                     <i class="fas fa-history mr-2"></i>
                     查看历史
                 </a>
-                <button type="button" onclick="confirmDeleteMood({{ mood.id }})"
+                <button type="button" onclick="deleteMood({{ mood.id }})"
                         class="px-6 py-3 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition-colors duration-300">
                     <i class="fas fa-trash mr-2"></i>
                     删除记录
@@ -186,56 +186,17 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 100);
 });
 
-// Function to confirm mood deletion
-function confirmDeleteMood(moodId) {
-    showModal('确定要删除这条心情记录吗？此操作无法撤销。', function() {
-        deleteMood(moodId);
-    });
-}
-
-// Function to delete mood via AJAX
+// 心情删除函数 - 使用公共库
 function deleteMood(moodId) {
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = `/mood/${moodId}/delete`;
-
-    // Add CSRF token if available
-    const csrfToken = document.querySelector('input[name="csrf_token"]');
-    if (csrfToken) {
-        const csrfInput = document.createElement('input');
-        csrfInput.type = 'hidden';
-        csrfInput.name = 'csrf_token';
-        csrfInput.value = csrfToken.value;
-        form.appendChild(csrfInput);
-    }
-
-    // Create and send AJAX request
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', form.action, true);
-    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-
-    xhr.onload = function() {
-        if (xhr.status === 200) {
-            // Redirect to mood history page after successful deletion
+    deleteManager.confirmDelete('mood', moodId, '这条心情记录', {
+        onSuccess: function(response) {
+            // 删除成功后重定向到心情历史页面
             window.location.href = '/mood/history';
-        } else {
-            // Handle error
-            alert('删除失败，请稍后重试');
+        },
+        onError: function(error) {
+            console.error('心情记录删除失败:', error);
         }
-    };
-
-    xhr.onerror = function() {
-        alert('删除失败，请稍后重试');
-    };
-
-    // Send the request
-    const formData = new FormData(form);
-    const params = new URLSearchParams();
-    for (const pair of formData) {
-        params.append(pair[0], pair[1]);
-    }
-    xhr.send(params.toString());
+    });
 }
 </script>
 {% endblock %}

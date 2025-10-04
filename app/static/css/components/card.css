@@ -1,0 +1,102 @@
+/**
+ * 卡片组件样式
+ */
+
+.card {
+    background: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    border: 1px solid #e5e7eb;
+    overflow: hidden;
+    transition: all 0.2s ease;
+}
+
+.card:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transform: translateY(-1px);
+}
+
+.card-header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+    background-color: #f9fafb;
+}
+
+.card-title {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #111827;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+.card-text {
+    margin-bottom: 0;
+    color: #4b5563;
+}
+
+.card-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #e5e7eb;
+    background-color: #f9fafb;
+}
+
+/* 卡片变体 */
+.card-primary {
+    border-left: 4px solid #3b82f6;
+}
+
+.card-success {
+    border-left: 4px solid #10b981;
+}
+
+.card-warning {
+    border-left: 4px solid #f59e0b;
+}
+
+.card-danger {
+    border-left: 4px solid #ef4444;
+}
+
+/* 紧凑卡片 */
+.card-sm .card-header,
+.card-sm .card-body,
+.card-sm .card-footer {
+    padding: 0.75rem 1rem;
+}
+
+.card-sm .card-title {
+    font-size: 1rem;
+}
+
+/* 大卡片 */
+.card-lg .card-header,
+.card-lg .card-body,
+.card-lg .card-footer {
+    padding: 2rem;
+}
+
+.card-lg .card-title {
+    font-size: 1.5rem;
+}
+
+/* 卡片组 */
+.card-group {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+/* 响应式卡片 */
+@media (max-width: 768px) {
+    .card {
+        margin-bottom: 1rem;
+    }
+
+    .card-group {
+        grid-template-columns: 1fr;
+    }
+}

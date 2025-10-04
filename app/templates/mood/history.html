@@ -68,9 +68,9 @@
             {% endif %}
 
             <!-- 心情记录列表 -->
-            <div class="space-y-4">
+            <div class="space-y-4" data-empty-message="还没有心情记录，快来记录第一个心情吧！">
                 {% for mood in moods %}
-                <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100 hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
+                <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100 hover:shadow-lg transition-all duration-300 hover:scale-[1.02]" data-item-id="{{ mood.id }}">
                     <div class="flex items-start justify-between">
                         <div class="flex-1">
                             <div class="flex items-center mb-3">
@@ -126,7 +126,7 @@
                                class="text-blue-600 hover:text-blue-800 transition-colors">
                                 <i class="fas fa-eye"></i>
                             </a>
-                            <button type="button" onclick="confirmDeleteMood({{ mood.id }})"
+                            <button type="button" onclick="deleteMood({{ mood.id }})"
                                 class="text-red-600 hover:text-red-800 transition-colors">
                             <i class="fas fa-trash"></i>
                         </button>
@@ -277,76 +277,17 @@ document.addEventListener('DOMContentLoaded', function() {
     );
 });
 
-// Function to confirm mood deletion
-function confirmDeleteMood(moodId) {
-    showModal('确定要删除这条心情记录吗？此操作无法撤销。', function() {
-        deleteMood(moodId);
-    });
-}
-
-// Function to delete mood via AJAX
+// 心情删除函数 - 使用公共库
 function deleteMood(moodId) {
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = `/mood/${moodId}/delete`;
-
-    // Add CSRF token if available
-    const csrfToken = document.querySelector('input[name="csrf_token"]');
-    if (csrfToken) {
-        const csrfInput = document.createElement('input');
-        csrfInput.type = 'hidden';
-        csrfInput.name = 'csrf_token';
-        csrfInput.value = csrfToken.value;
-        form.appendChild(csrfInput);
-    }
-
-    // Create and send AJAX request
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', form.action, true);
-    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-
-    xhr.onload = function() {
-        if (xhr.status === 200) {
-            // Remove the mood element with animation
-            const moodCard = document.querySelector(`button[onclick="confirmDeleteMood(${moodId})"]`).closest('.bg-white.rounded-xl');
-            if (moodCard) {
-                moodCard.style.transition = 'opacity 0.3s, transform 0.3s';
-                moodCard.style.opacity = '0';
-                moodCard.style.transform = 'scale(0.95)';
-
-                setTimeout(() => {
-                    moodCard.remove();
-
-                    // Check if there are no more moods
-                    const remainingMoods = document.querySelectorAll('.bg-white.rounded-xl');
-                    if (remainingMoods.length === 0) {
-                        const container = document.querySelector('.space-y-4');
-                        container.innerHTML = `
-                            <div class="bg-white rounded-xl shadow-md p-8 text-center">
-                                <p class="text-gray-500">还没有心情记录，快来记录第一个心情吧！</p>
-                            </div>
-                        `;
-                    }
-                }, 300);
-            }
-        } else {
-            // Handle error
-            alert('删除失败，请稍后重试');
+    deleteManager.confirmDelete('mood', moodId, '这条心情记录', {
+        containerSelector: '.space-y-4',
+        onSuccess: function(response) {
+            console.log('心情记录删除成功:', response);
+        },
+        onError: function(error) {
+            console.error('心情记录删除失败:', error);
         }
-    };
-
-    xhr.onerror = function() {
-        alert('删除失败，请稍后重试');
-    };
-
-    // Send the request
-    const formData = new FormData(form);
-    const params = new URLSearchParams();
-    for (const pair of formData) {
-        params.append(pair[0], pair[1]);
-    }
-    xhr.send(params.toString());
+    });
 }
 </script>
 {% endblock %}
