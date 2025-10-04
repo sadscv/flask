@@ -1,6 +1,7 @@
 from flask import abort
 from flask import current_app
 from flask import flash
+from flask import jsonify
 from flask import redirect
 from flask import render_template
 from flask import request
@@ -180,7 +181,13 @@ def delete_post(id):
         abort(403)
     post = Post.query.get_or_404(id)
     db.session.delete(post)
-    flash('post deleted')
+    db.session.commit()
+    flash('文章已删除')
+
+    # 检查是否为AJAX请求
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return jsonify({'success': True, 'message': '文章已删除'})
+
     return redirect(url_for('.index'))
 
 
@@ -265,11 +272,19 @@ def thoughts():
 @login_required
 def delete_thought(id):
     thought = Thought.query.get_or_404(id)
-    if thought.author != current_user:
+
+    # 允许作者或管理员删除
+    if thought.author != current_user and not current_user.is_administrator():
         abort(403)
+
     thought.is_deleted = True
     db.session.add(thought)
     db.session.commit()
+
+    # 检查是否为AJAX请求
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return jsonify({'success': True, 'message': '想法已删除'})
+
     flash('想法已删除')
     return redirect(url_for('.thoughts'))
 
@@ -482,10 +497,17 @@ def mood_by_date(date_str):
 def delete_mood(id):
     """删除心情记录"""
     mood = Mood.query.get_or_404(id)
-    if mood.author != current_user:
+
+    # 允许作者或管理员删除
+    if mood.author != current_user and not current_user.is_administrator():
         abort(403)
 
     db.session.delete(mood)
     db.session.commit()
     flash('心情记录已删除', 'success')
+
+    # 检查是否为AJAX请求
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return jsonify({'success': True, 'message': '心情记录已删除'})
+
     return redirect(url_for('.mood_history'))
