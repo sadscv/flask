@@ -169,9 +169,10 @@ def mood_by_date(date_str):
 
 @main.route('/mood/<int:id>/delete', methods=['POST'])
 @login_required
-@ajax_route
 def delete_mood(id):
     """删除心情记录"""
+    from flask import jsonify
+
     mood = Mood.query.get_or_404(id)
 
     # 检查删除权限
@@ -179,9 +180,10 @@ def delete_mood(id):
 
     db.session.delete(mood)
     db.session.commit()
+
+    # 检查是否为AJAX请求
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return jsonify({'success': True, 'message': '心情记录已删除'})
+
     flash('心情记录已删除', 'success')
-
-    if is_ajax_request():
-        return ajax_success('心情记录已删除')
-
     return redirect(url_for('.mood_history'))

@@ -279,14 +279,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // 心情删除函数 - 使用公共库
 function deleteMood(moodId) {
+    if (typeof deleteManager === 'undefined') {
+        alert('删除功能暂不可用，请刷新页面重试');
+        return;
+    }
+
     deleteManager.confirmDelete('mood', moodId, '这条心情记录', {
-        containerSelector: '.space-y-4',
-        onSuccess: function(response) {
-            console.log('心情记录删除成功:', response);
-        },
-        onError: function(error) {
-            console.error('心情记录删除失败:', error);
-        }
+        containerSelector: '.space-y-4'
     });
 }
 </script>

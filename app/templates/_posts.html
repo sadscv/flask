@@ -1,87 +1,100 @@
-<div class="space-y-6">
+<div class="card-list">
     {% for post in posts %}
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200">
-            <div class="flex items-start justify-between">
-                <div class="flex-1">
-                    <!-- Post Header -->
-                    <div class="flex items-center mb-4">
-                        <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold mr-3">
-                            {{ post.author.username[0].upper() }}
-                        </div>
-                        <div>
-                            <a href="{{ url_for('.user', username=post.author.username) }}" class="font-medium text-gray-900 hover:text-blue-600">
-                                {{ post.author.username }}
-                            </a>
-                            <div class="text-sm text-gray-500">
-                                {% if post.edit_date %}
-                                    <i class="fas fa-edit mr-1"></i>{{ moment(post.edit_date).format('YYYY-MM-DD HH:mm') }} 编辑
-                                {% else %}
-                                    <i class="fas fa-clock mr-1"></i>{{ moment(post.timestamp).format('YYYY-MM-DD HH:mm') }}
-                                {% endif %}
-                            </div>
-                        </div>
+    <article class="card">
+        <div class="card-header">
+            <div class="flex items-start justify-between mb-3">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">
+                        {{ post.author.username[0].upper() }}
                     </div>
-
-                    <!-- Post Content -->
-                    <div class="prose prose-sm max-w-none mb-4 overflow-wrap-break-word">
-                        {% if post.body_html %}
-                            {{ post.body_html | safe }}
-                        {% else %}
-                            <p class="text-gray-700">{{ post.body }}</p>
-                        {% endif %}
-                    </div>
-
-                    <!-- Post Footer -->
-                    <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
-                        <!-- Post Stats -->
-                        <div class="flex items-center space-x-4 text-sm text-gray-500">
-                            <span class="flex items-center">
-                                <i class="fas fa-eye mr-1"></i>
-                                {{ post.views or 0 }}
-                            </span>
-                            <span class="flex items-center">
-                                <i class="fas fa-comment mr-1"></i>
-                                {{ post.comments.count() if post.comments else 0 }}
-                            </span>
-                        </div>
-
-                        <!-- Action Buttons -->
-                        <div class="flex items-center space-x-2">
-                            {% if current_user.is_anonymous %}
-                                <a href="{{ url_for('.post', id=post.id) }}" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
-                                    <i class="fas fa-external-link-alt mr-1"></i>阅读全文
-                                </a>
+                    <div>
+                        <a href="{{ url_for('.user', username=post.author.username) }}" class="font-semibold text-gray-900 hover:text-blue-600 transition-colors">
+                            {{ post.author.username }}
+                        </a>
+                        <p class="text-sm text-gray-500">
+                            {% if post.edit_date %}
+                                <i class="fas fa-edit mr-1"></i>{{ moment(post.edit_date).format('YYYY-MM-DD HH:mm') }} 编辑
+                            {% else %}
+                                <i class="fas fa-clock mr-1"></i>{{ moment(post.timestamp).format('YYYY-MM-DD HH:mm') }}
                             {% endif %}
-
-                            {% if current_user.is_administrator() %}
-                                <a href="{{ url_for('.edit_post', id=post.id) }}" class="inline-flex items-center justify-center w-8 h-8 bg-blue-50 text-blue-600 text-sm font-medium rounded-lg hover:bg-blue-100 hover:text-blue-700 transition-colors duration-200" title="编辑">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <a href="{{ url_for('.delete_post', id=post.id) }}"
-                                   onclick="return confirm('确定要删除这篇文章吗？')"
-                                   class="inline-flex items-center justify-center w-8 h-8 bg-red-50 text-red-600 text-sm font-medium rounded-lg hover:bg-red-100 hover:text-red-700 transition-colors duration-200" title="删除">
-                                    <i class="fas fa-trash"></i>
-                                </a>
-                            {% elif current_user == post.author %}
-                                <a href="{{ url_for('.edit_post', id=post.id) }}" class="inline-flex items-center justify-center w-8 h-8 bg-blue-50 text-blue-600 text-sm font-medium rounded-lg hover:bg-blue-100 hover:text-blue-700 transition-colors duration-200" title="编辑">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                            {% endif %}
-                        </div>
+                        </p>
                     </div>
+                </div>
+                <div class="flex items-center space-x-2">
+                    {% if post.edit_date %}
+                    <span class="px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">
+                        已编辑
+                    </span>
+                    {% endif %}
                 </div>
             </div>
         </div>
+
+        <div class="card-body">
+            <div class="article-content">
+                {% if post.body_html %}
+                    {{ post.body_html | safe }}
+                {% else %}
+                    <p class="card-text">{{ post.body }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card-footer">
+            <div class="article-stats">
+                <div class="article-stat">
+                    <i class="fas fa-eye article-meta-icon"></i>
+                    <span>{{ post.views or 0 }}</span>
+                </div>
+                <div class="article-stat">
+                    <i class="fas fa-comment article-meta-icon"></i>
+                    <span>{{ post.comments.count() if post.comments else 0 }}</span>
+                </div>
+            </div>
+
+            <div class="article-actions">
+                {% if current_user.is_anonymous %}
+                    <a href="{{ url_for('.post', id=post.id) }}" class="card-action primary">
+                        <i class="fas fa-book-open mr-1"></i>阅读全文
+                    </a>
+                {% endif %}
+
+                {% if current_user.is_administrator() %}
+                    <a href="{{ url_for('.edit_post', id=post.id) }}" class="card-action secondary" title="编辑">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    <a href="#" onclick="alert('删除功能暂时不可用'); return false;" class="card-action secondary" title="删除">
+                        <i class="fas fa-trash"></i>
+                    </a>
+                {% elif current_user == post.author %}
+                    <a href="{{ url_for('.edit_post', id=post.id) }}" class="card-action secondary" title="编辑">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </article>
     {% endfor %}
 </div>
 
 <!-- Empty State -->
 {% if not posts %}
-<div class="text-center py-12">
-    <div class="mb-4">
-        <i class="fas fa-inbox text-6xl text-gray-300"></i>
+<div class="text-center py-16">
+    <div class="mb-6">
+        <i class="fas fa-inbox text-8xl text-gray-300"></i>
     </div>
-    <h3 class="text-xl font-semibold text-gray-900 mb-2">暂无文章</h3>
-    <p class="text-gray-500">还没有任何文章内容。</p>
+    <h3 class="text-2xl font-bold text-gray-900 mb-3">暂无文章</h3>
+    <p class="text-gray-500 text-lg mb-6">还没有任何文章内容，快去创作第一篇吧！</p>
+    {% if current_user.is_authenticated %}
+    <a href="{{ url_for('main.create_post') }}" class="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors">
+        <i class="fas fa-plus mr-2"></i>
+        创建文章
+    </a>
+    {% else %}
+    <a href="{{ url_for('auth.register') }}" class="inline-flex items-center px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors">
+        <i class="fas fa-user-plus mr-2"></i>
+        注册账号
+    </a>
+    {% endif %}
 </div>
 {% endif %}

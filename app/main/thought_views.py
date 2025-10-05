@@ -44,9 +44,10 @@ def thoughts():
 
 @main.route('/thought/<int:id>/delete', methods=['POST'])
 @login_required
-@ajax_route
 def delete_thought(id):
     """删除想法（软删除）"""
+    from flask import jsonify
+
     thought = Thought.query.get_or_404(id)
 
     # 检查删除权限
@@ -56,8 +57,9 @@ def delete_thought(id):
     db.session.add(thought)
     db.session.commit()
 
-    if is_ajax_request():
-        return ajax_success('想法已删除')
+    # 检查是否为AJAX请求
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return jsonify({'success': True, 'message': '想法已删除'})
 
     flash('想法已删除')
     return redirect(url_for('.thoughts'))

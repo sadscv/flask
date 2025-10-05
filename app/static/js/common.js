@@ -69,6 +69,7 @@ class ModalManager {
         titleEl.textContent = title;
         messageEl.textContent = message;
         modal.style.display = 'flex';
+        modal.classList.add('show');
 
         // 移除旧的事件监听器
         const newConfirmBtn = confirmBtn.cloneNode(true);
@@ -83,7 +84,14 @@ class ModalManager {
 
     hide() {
         const modal = document.getElementById(this.modalId);
-        modal.style.display = 'none';
+        modal.classList.remove('show');
+
+        // 等待过渡动画完成后隐藏
+        setTimeout(() => {
+            if (!modal.classList.contains('show')) {
+                modal.style.display = 'none';
+            }
+        }, 300);
     }
 }
 
@@ -115,8 +123,16 @@ class AjaxManager {
                         const response = xhr.responseText ? JSON.parse(xhr.responseText) : { success: true };
                         resolve(response);
                     } catch (e) {
-                        resolve({ success: true, text: xhr.responseText });
+                        // 检查是否是重定向到登录页面（未登录用户）
+                        if (xhr.responseText.includes('login') || xhr.responseText.includes('Redirecting')) {
+                            reject(new Error('需要登录才能执行此操作'));
+                        } else {
+                            resolve({ success: true, text: xhr.responseText });
+                        }
                     }
+                } else if (xhr.status === 302) {
+                    // 处理重定向（通常是未登录导致的）
+                    reject(new Error('需要登录才能执行此操作'));
                 } else {
                     reject(new Error(`HTTP ${xhr.status}: ${xhr.statusText}`));
                 }
@@ -164,6 +180,8 @@ class DeleteManager {
 
     // 通用删除确认
     confirmDelete(itemType, itemId, itemName = '', options = {}) {
+        console.log('confirmDelete called:', { itemType, itemId, itemName, options });
+
         const {
             title = '确认删除',
             message = itemName ? `确定要删除"${itemName}"吗？此操作无法撤销。` : `确定要删除这个${itemType}吗？此操作无法撤销。`,
@@ -173,9 +191,19 @@ class DeleteManager {
             containerSelector = null
         } = options;
 
+        console.log('Delete URL:', url);
+        console.log('Modal manager available:', typeof this.modal !== 'undefined');
+        console.log('AJAX manager available:', typeof this.ajax !== 'undefined');
+        console.log('CSRF token available:', this.ajax.csrfToken);
+
         this.modal.show(title, message, async () => {
+            console.log('User confirmed deletion, sending request...');
+            console.log('Request URL:', url);
+            console.log('CSRF Token:', this.ajax.csrfToken);
+
             try {
                 const response = await this.ajax.post(url);
+                console.log('Delete response:', response);
 
                 if (response.success) {
                     // 移除元素
@@ -193,8 +221,9 @@ class DeleteManager {
                 }
             } catch (error) {
                 console.error('删除失败:', error);
+                console.error('Error details:', error.message, error.stack);
                 if (onError) onError(error);
-                this.showFlashMessage('删除失败，请稍后重试', 'error');
+                this.showFlashMessage(`删除失败: ${error.message}`, 'error');
             }
         });
     }
@@ -340,4 +369,7 @@ window.Utils = {
 // DOM加载完成后初始化
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Common.js loaded and initialized');
+    console.log('deleteManager available:', typeof deleteManager !== 'undefined');
+    console.log('modalManager available:', typeof modalManager !== 'undefined');
+    console.log('ajaxManager available:', typeof ajaxManager !== 'undefined');
 });

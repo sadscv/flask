@@ -163,6 +163,7 @@
 {% endblock %}
 
 {% block scripts %}
+{{ super() }}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const contentInput = document.querySelector('#content');
@@ -184,22 +185,23 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // 自动调整文本框高度
-    contentInput.addEventListener('input', function() {
-        this.style.height = 'auto';
-        this.style.height = this.scrollHeight + 'px';
-    });
+    if (contentInput) {
+        contentInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = this.scrollHeight + 'px';
+        });
+    }
 });
 
 // 想法删除函数 - 使用公共库
 function deleteThought(thoughtId) {
+    if (typeof deleteManager === 'undefined') {
+        alert('删除功能暂不可用，请刷新页面重试');
+        return;
+    }
+
     deleteManager.confirmDelete('thought', thoughtId, '', {
-        containerSelector: '.space-y-4',
-        onSuccess: function(response) {
-            console.log('想法删除成功:', response);
-        },
-        onError: function(error) {
-            console.error('想法删除失败:', error);
-        }
+        containerSelector: '.space-y-4'
     });
 }
 </script>

@@ -18,11 +18,36 @@ from .thought_views import *
 from .post_views import *
 from .mood_views import *
 
+# 导入表单
+from .forms import ThoughtForm
+
 
 # 主页
 @main.route('/', methods=['GET', 'POST'])
 def index():
     """主页"""
+    # 处理快速创建想法的POST请求
+    if request.method == 'POST' and current_user.is_authenticated:
+        form = ThoughtForm()
+        if form.validate_on_submit():
+            # 确保快速创建的想法是公开的
+            is_public = form.is_public.data
+            if is_public is None:
+                is_public = True
+
+            thought = Thought(
+                content=form.content.data,
+                author=current_user._get_current_object(),
+                tags=form.tags.data,
+                thought_type=form.thought_type.data,
+                source_url=form.source_url.data,
+                is_public=is_public
+            )
+            db.session.add(thought)
+            db.session.commit()
+            flash('想法已记录！')
+            return redirect(url_for('.index'))
+
     page = request.args.get('page', 1, type=int)
     pagination = Post.query.order_by(Post.timestamp.desc()).paginate(
         page=page, per_page=10, error_out=False)
@@ -97,7 +122,8 @@ def index():
 
     return render_template('index.html', posts=posts,
                            pagination=pagination, recent_thoughts=recent_thoughts,
-                           mood_calendar_data=mood_calendar_data, Mood=Mood)
+                           mood_calendar_data=mood_calendar_data, Mood=Mood,
+                           quick_form=ThoughtForm())
 
 
 # 用户信息
