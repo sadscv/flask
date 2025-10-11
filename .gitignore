@@ -38,3 +38,5 @@ diary_entries_filtered.txt
 tests/test_report.md
 # 临时测试数据库
 test.db
+# 配置文件（包含敏感信息）
+config.py
