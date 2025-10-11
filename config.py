@@ -26,7 +26,8 @@ class DevelopmentConfig(Config):
 class TestingConfig(Config):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = \
-        'mysql+pymysql://flask:sadsad@localhost:3306/flask_blog_test?charset=utf8'
+        'sqlite:///' + os.path.join(basedir, 'test.db')
+    WTF_CSRF_ENABLED = False
 
 class ProductionConfig(Config):
     SQLALCHEMY_DATABASE_URI = \

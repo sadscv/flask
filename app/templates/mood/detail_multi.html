@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+
+{% block title %}{{ target_date }} 心情记录{% endblock %}
+
+{% block page_content %}
+<div class="max-w-6xl mx-auto px-4 py-8">
+    <!-- 返回按钮 -->
+    <div class="mb-6">
+        <a href="{{ url_for('main.mood_history') }}"
+           class="inline-flex items-center text-gray-600 hover:text-gray-800 transition-colors">
+            <i class="fas fa-arrow-left mr-2"></i>
+            返回心情历史
+        </a>
+    </div>
+
+    <!-- 统计概览 -->
+    <div class="bg-gradient-to-r from-purple-100 via-pink-100 to-blue-100 rounded-2xl p-8 mb-8">
+        <div class="text-center mb-6">
+            <h1 class="text-3xl font-light text-gray-800 mb-2">
+                {{ target_date }} 心情记录
+            </h1>
+            <p class="text-gray-600">共记录了 {{ moods|length }} 次心情变化</p>
+        </div>
+
+        <!-- 统计信息 -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
+            <div class="text-center">
+                <div class="text-3xl font-bold text-purple-600">{{ moods|length }}</div>
+                <div class="text-sm text-gray-600">记录次数</div>
+            </div>
+            <div class="text-center">
+                <div class="text-3xl font-bold text-blue-600">{{ "%.1f"|format(avg_intensity) }}</div>
+                <div class="text-sm text-gray-600">平均强度</div>
+            </div>
+            <div class="text-center">
+                <div class="text-6xl mb-2">
+                    {% if primary_mood.mood_type != 'custom' %}
+                        {{ Mood.MOOD_CONFIG[primary_mood.mood_type].icon }}
+                    {% else %}
+                        💭
+                    {% endif %}
+                </div>
+                <div class="text-sm text-gray-600">主导心情</div>
+            </div>
+            <div class="text-center">
+                <div class="text-lg font-semibold text-green-600">
+                    {% if primary_mood.mood_type != 'custom' %}
+                        {{ Mood.MOOD_CONFIG[primary_mood.mood_type].label }}
+                    {% else %}
+                        {{ primary_mood.custom_mood }}
+                    {% endif %}
+                </div>
+                <div class="text-sm text-gray-600">主要状态</div>
+            </div>
+        </div>
+
+        <!-- 心情分布图 -->
+        <div class="bg-white rounded-lg p-4">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4 text-center">心情分布</h3>
+            <div id="moodDistributionChart" class="h-64"></div>
+        </div>
+    </div>
+
+    <!-- 时间轴 -->
+    <div class="bg-white rounded-2xl shadow-lg p-8">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-6 flex items-center">
+            <i class="fas fa-clock text-purple-500 mr-3"></i>
+            心情时间轴
+        </h2>
+
+        <div class="space-y-6">
+            {% for mood in timeline_moods %}
+            <div class="flex items-start space-x-4 p-4 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
+                <!-- 时间标记 -->
+                <div class="flex-shrink-0 w-20 text-center">
+                    <div class="text-xs text-gray-500">{{ mood.timestamp.strftime('%H:%M') }}</div>
+                    <div class="w-3 h-3 bg-purple-500 rounded-full mx-auto mt-1"></div>
+                </div>
+
+                <!-- 心情图标 -->
+                <div class="flex-shrink-0 text-3xl">
+                    {% if mood.mood_type != 'custom' %}
+                        {{ Mood.MOOD_CONFIG[mood.mood_type].icon }}
+                    {% else %}
+                        💭
+                    {% endif %}
+                </div>
+
+                <!-- 心情详情 -->
+                <div class="flex-1">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-lg font-semibold text-gray-800">
+                            {% if mood.mood_type != 'custom' %}
+                                {{ Mood.MOOD_CONFIG[mood.mood_type].label }}
+                            {% else %}
+                                {{ mood.custom_mood }}
+                            {% endif %}
+                        </h3>
+                        <div class="flex items-center space-x-2">
+                            <!-- 强度指示器 -->
+                            <div class="flex items-center">
+                                <span class="text-sm text-gray-600 mr-2">强度:</span>
+                                <div class="w-20 bg-gray-200 rounded-full h-2">
+                                    <div class="bg-purple-500 h-2 rounded-full" style="width: {{ mood.intensity * 10 }}%"></div>
+                                </div>
+                                <span class="text-sm text-gray-600 ml-2">{{ mood.intensity }}/10</span>
+                            </div>
+                            <!-- 删除按钮 -->
+                            <form method="POST" action="{{ url_for('main.delete_mood', id=mood.id) }}"
+                                  class="inline-block"
+                                  onsubmit="return confirm('确定要删除这条心情记录吗？')">
+                                <button type="submit" class="text-red-500 hover:text-red-700 transition-colors">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    {% if mood.diary %}
+                    <div class="bg-gray-50 rounded-lg p-4 mb-3">
+                        <h4 class="text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-pen text-gray-500 mr-2"></i>
+                            日记内容
+                        </h4>
+                        <p class="text-gray-600 whitespace-pre-wrap">{{ mood.diary }}</p>
+                    </div>
+                    {% endif %}
+
+                    <div class="text-xs text-gray-500">
+                        记录时间：{{ mood.timestamp.strftime('%Y年%m月%d日 %H:%M:%S') }}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- 导航 -->
+    <div class="flex justify-between items-center mt-8">
+        {% if prev_date %}
+        <a href="{{ url_for('main.mood_by_date', date_str=prev_date.isoformat()) }}"
+           class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+            <i class="fas fa-chevron-left mr-2"></i>
+            {{ prev_date }} 的心情
+        </a>
+        {% else %}
+        <div></div>
+        {% endif %}
+
+        {% if next_date %}
+        <a href="{{ url_for('main.mood_by_date', date_str=next_date.isoformat()) }}"
+           class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+            {{ next_date }} 的心情
+            <i class="fas fa-chevron-right ml-2"></i>
+        </a>
+        {% else %}
+        <div></div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+// 简单的心情分布图表
+document.addEventListener('DOMContentLoaded', function() {
+    const moods = [
+        {% for mood in moods %}
+        {
+            'id': {{ mood.id }},
+            'mood_type': '{{ mood.mood_type }}',
+            'custom_mood': {{ mood.custom_mood | tojson }},
+            'intensity': {{ mood.intensity }},
+            'diary': {{ mood.diary | tojson }},
+            'date': '{{ mood.date.isoformat() if mood.date else None }}',
+            'timestamp': '{{ mood.timestamp.isoformat() if mood.timestamp else None }}'
+        }{{ ',' if not loop.last }}
+        {% endfor %}
+    ];
+    const moodCounts = {};
+
+    // 统计各类型心情数量
+    moods.forEach(mood => {
+        if (!moodCounts[mood.mood_type]) {
+            moodCounts[mood.mood_type] = 0;
+        }
+        moodCounts[mood.mood_type]++;
+    });
+
+    // 创建简单的柱状图
+    const chartContainer = document.getElementById('moodDistributionChart');
+    if (chartContainer && Object.keys(moodCounts).length > 0) {
+        const moodConfig = {
+            'happy': { icon: '😊', label: '开心', color: '#FCD34D' },
+            'calm': { icon: '😌', label: '平静', color: '#93C5FD' },
+            'anxious': { icon: '😰', label: '焦虑', color: '#C4B5FD' },
+            'sad': { icon: '😢', label: '伤心', color: '#9CA3AF' },
+            'angry': { icon: '😠', label: '愤怒', color: '#F87171' },
+            'custom': { icon: '💭', label: '自定义', color: '#86EFAC' }
+        };
+
+        let chartHTML = '<div class="flex items-end justify-center space-x-4 h-full">';
+
+        Object.entries(moodCounts).forEach(([moodType, count]) => {
+            const config = moodConfig[moodType] || moodConfig['custom'];
+            const percentage = (count / moods.length) * 100;
+
+            chartHTML += `
+                <div class="flex flex-col items-center flex-1">
+                    <div class="text-2xl mb-2">${config.icon}</div>
+                    <div class="w-full bg-gray-200 rounded-t-lg relative" style="height: 120px;">
+                        <div class="absolute bottom-0 w-full rounded-t-lg transition-all duration-500"
+                             style="height: ${percentage}%; background-color: ${config.color}; opacity: 0.8;">
+                        </div>
+                    </div>
+                    <div class="text-xs text-center mt-2">
+                        <div class="font-medium">${config.label}</div>
+                        <div class="text-gray-500">${count}次</div>
+                    </div>
+                </div>
+            `;
+        });
+
+        chartHTML += '</div>';
+        chartContainer.innerHTML = chartHTML;
+    }
+});
+</script>
+{% endblock %}

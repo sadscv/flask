@@ -3,40 +3,50 @@
 {% block title %}Sad{% endblock %}
 
 {% block page_content %}
-<!-- 两栏布局 -->
-<div class="max-w-7xl mx-auto">
-    <div class="flex min-h-screen">
+<!-- 响应式布局 -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- 移动端顶部操作栏 -->
+    <div class="lg:hidden flex justify-between items-center mb-4 sticky top-0 z-20 bg-white/95 backdrop-blur-sm border-b border-gray-200 pb-3 pt-3">
+        <h1 class="text-xl font-bold text-gray-900">主页</h1>
+        <button id="sidebarToggle" class="p-3 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors touch-manipulation active:scale-95">
+            <i class="fas fa-lightbulb text-lg"></i>
+            <span class="ml-2 text-sm font-medium">想法</span>
+        </button>
+    </div>
+
+    <div class="flex flex-col lg:flex-row gap-6 lg:gap-8 justify-center">
         <!-- 左侧：主要内容区域 -->
-        <div class="flex-1 max-w-4xl">
+        <div class="w-full lg:flex-[2] lg:max-w-4xl">
             <!-- 欢迎卡片 -->
-            <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+            <div class="bg-white rounded-lg shadow-sm p-4 sm:p-6 mb-6">
                 <div>
-                    <h1 class="text-3xl font-bold text-gray-900 mb-2">
+                    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
                         Hello, {% if current_user.is_authenticated %}{{ current_user.username }}{% else %}Stranger{% endif %}
                     </h1>
-                    <p class="text-gray-600">Welcome to the blog</p>
+                    <p class="text-gray-600 text-sm sm:text-base">Welcome to the blog</p>
                 </div>
             </div>
             {% include '_posts.html' %}
 
         <!-- 分页移到这里 -->
         {% if pagination %}
-        <div class="mt-8 flex justify-center">
-            <nav class="flex items-center space-x-2">
+        <div class="mt-8 flex justify-center px-2">
+            <nav class="flex items-center space-x-1 sm:space-x-2">
                 {% if pagination.has_prev %}
-                    <a href="{{ url_for('.index', page=pagination.prev_num) }}" class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
-                        <i class="fas fa-chevron-left mr-1"></i>Previous
+                    <a href="{{ url_for('.index', page=pagination.prev_num) }}" class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 touch-manipulation transition-colors">
+                        <i class="fas fa-chevron-left mr-1"></i>
+                        <span class="hidden sm:inline">上一页</span>
                     </a>
                 {% endif %}
 
                 {% for page in pagination.iter_pages() %}
                     {% if page %}
                         {% if page != pagination.page %}
-                        <a href="{{ url_for('.index', page=page) }}" class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                        <a href="{{ url_for('.index', page=page) }}" class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 touch-manipulation transition-colors min-w-[2.5rem] text-center">
                             {{ page }}
                         </a>
                         {% else %}
-                        <span class="px-3 py-2 text-sm font-medium text-white bg-blue-600 border border-blue-600 rounded-md">
+                        <span class="px-3 py-2 text-sm font-medium text-white bg-blue-600 border border-blue-600 rounded-md min-w-[2.5rem] text-center">
                             {{ page }}
                         </span>
                         {% endif %}
@@ -46,8 +56,9 @@
                 {% endfor %}
 
                 {% if pagination.has_next %}
-                    <a href="{{ url_for('.index', page=pagination.next_num) }}" class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
-                        Next<i class="fas fa-chevron-right ml-1"></i>
+                    <a href="{{ url_for('.index', page=pagination.next_num) }}" class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 touch-manipulation transition-colors">
+                        <span class="hidden sm:inline">下一页</span>
+                        <i class="fas fa-chevron-right ml-1"></i>
                     </a>
                 {% endif %}
             </nav>
@@ -55,17 +66,44 @@
         {% endif %}
     </div>
 
-    <!-- 右侧：想法展示 -->
-    <div class="ml-6" style="width: calc(1280px - 896px - 24px)">
-        <!-- 小型心情日历 -->
+    <!-- 右侧：想法展示（移动端折叠） -->
+    <div id="sidebarContainer" class="w-full lg:flex-[1] lg:max-w-sm mt-6 lg:mt-0 lg:block hidden">
+        <!-- 移动端全屏遮罩层 -->
+        <div id="mobileOverlay" class="lg:hidden fixed inset-0 bg-black/60 z-40 hidden transition-opacity duration-300"></div>
+
+        <!-- 移动端侧边栏面板 -->
+        <div id="mobilePanel" class="lg:hidden fixed top-0 right-0 h-full w-80 bg-white z-50 shadow-2xl transform translate-x-full transition-transform duration-300 ease-out overflow-hidden">
+            <!-- 移动端面板头部 -->
+            <div class="flex items-center justify-between p-4 border-b border-gray-200 bg-white sticky top-0 z-10">
+                <h2 class="text-lg font-semibold text-gray-900 flex items-center">
+                    <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>
+                    想法与心情
+                </h2>
+                <button id="closeMobilePanel" class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors touch-manipulation">
+                    <i class="fas fa-times text-lg"></i>
+                </button>
+            </div>
+
+            <!-- 移动端面板内容 -->
+            <div class="h-[calc(100vh-80px)] overflow-y-auto p-4 space-y-4">
+                <!-- 桌面端侧边栏内容（复制到移动端面板） -->
+                <div id="mobileSidebarContent" class="space-y-4">
+                </div>
+            </div>
+        </div>
+
+        <!-- 桌面端侧边栏内容 -->
+        <div class="lg:block hidden">
+            <!-- 小型心情日历 -->
         {% if current_user.is_authenticated and mood_calendar_data %}
-        <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg border border-purple-200 p-3 mb-4">
+        <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg border border-purple-200 p-3 sm:p-4 mb-4">
             <div class="flex items-center justify-between mb-3">
-                <h3 class="text-sm font-bold text-gray-900 flex items-center">
+                <h3 class="text-sm sm:text-base font-bold text-gray-900 flex items-center">
                     <i class="fas fa-calendar-alt text-purple-500 mr-2"></i>
-                    {{ mood_calendar_data.year }}年{{ mood_calendar_data.month }}月心情
+                    <span class="hidden sm:inline">{{ mood_calendar_data.year }}年{{ mood_calendar_data.month }}月心情</span>
+                    <span class="sm:hidden">{{ mood_calendar_data.month }}月心情</span>
                 </h3>
-                <a href="{{ url_for('main.mood_calendar') }}" class="text-purple-600 hover:text-purple-800 text-xs">
+                <a href="{{ url_for('main.mood_calendar') }}" class="text-purple-600 hover:text-purple-800 text-xs sm:text-sm p-1 hover:bg-purple-100 rounded transition-colors">
                     <i class="fas fa-expand"></i>
                 </a>
             </div>
@@ -93,32 +131,22 @@
                     {% endif %}
 
                     {% if day_info.valid and day <= mood_calendar_data.days_in_month %}
-                        <div class="aspect-square border rounded overflow-hidden transition-all duration-200 hover:scale-110
+                        <div class="aspect-square border rounded overflow-hidden transition-all duration-200 hover:scale-105
                             {% if mood_calendar_data.calendar_data.get(day) %}
-                                {% set mood = mood_calendar_data.calendar_data[day] %}
-                                {% if mood.mood_type != 'custom' %}
-                                    border-{{ mood.mood_type }}-300 {{ Mood.MOOD_CONFIG[mood.mood_type].color }}
-                                {% else %}
-                                    border-green-300 bg-gradient-to-br from-green-50 to-blue-50
-                                {% endif %}
                                 cursor-pointer
                             {% else %}
                                 border-gray-200 bg-gray-50
-                            {% endif %}">
+                            {% endif %}"
+                            {% if mood_calendar_data.calendar_data.get(day) %}
+                                data-mood-day='{{ mood_calendar_data.calendar_data[day] | tojson }}'
+                            {% endif %}>
 
                             {% if mood_calendar_data.calendar_data.get(day) %}
-                                {% set mood = mood_calendar_data.calendar_data[day] %}
-                                <a href="{{ url_for('main.mood_by_date', date_str=mood.date.isoformat()) }}"
-                                   class="block h-full p-1 text-center hover:bg-white hover:bg-opacity-30 transition-colors">
+                                <!-- 渐进式展示将由JavaScript处理 -->
+                                <div class="h-full p-1 text-center">
                                     <div class="text-xs font-medium">{{ day }}</div>
-                                    <div class="text-xs">
-                                        {% if mood.mood_type != 'custom' %}
-                                            {{ Mood.MOOD_CONFIG[mood.mood_type].icon }}
-                                        {% else %}
-                                            💭
-                                        {% endif %}
-                                    </div>
-                                </a>
+                                    <div class="mood-visualization-container" data-size="40"></div>
+                                </div>
                             {% else %}
                                 <div class="h-full p-1 text-center">
                                     <div class="text-xs font-medium text-gray-400">{{ day }}</div>
@@ -156,8 +184,8 @@
             </div>
 
             <!-- 快速创建想法 -->
-            <div class="bg-white rounded-lg p-3 mb-3 border border-gray-200">
-                <div class="text-xs text-gray-500 mb-2">
+            <div class="bg-white rounded-lg p-3 sm:p-4 mb-3 border border-gray-200">
+                <div class="text-xs sm:text-sm text-gray-500 mb-2">
                     {% if current_user.is_authenticated %}
                         已登录用户可以创建想法
                     {% else %}
@@ -168,20 +196,20 @@
                     {{ quick_form.hidden_tag() }}
                     <input type="hidden" name="is_public" value="y">
                     <div>
-                        {{ quick_form.content(class='w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-sm',
-                                            placeholder='快速记录想法...', rows='2') }}
+                        {{ quick_form.content(class='w-full p-3 sm:p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-sm touch-manipulation',
+                                            placeholder='快速记录想法...', rows='3') }}
                         <div class="mt-1 text-right text-xs text-gray-500">
                             <span id="quickCharCount">0</span>/500
                         </div>
                     </div>
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                            {{ quick_form.thought_type(class='text-sm p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent') }}
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                        <div class="flex items-center gap-2 w-full sm:w-auto">
+                            {{ quick_form.thought_type(class='text-sm p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full sm:w-auto touch-manipulation') }}
                         </div>
                         {% if current_user.is_authenticated %}
-                            {{ quick_form.submit(class='px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm focus:ring-2 focus:ring-blue-500 focus:ring-offset-2') }}
+                            {{ quick_form.submit(class='w-full sm:w-auto px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 touch-manipulation active:scale-95 transition-transform') }}
                         {% else %}
-                            <button type="button" class="px-4 py-2 bg-gray-400 text-white rounded-lg text-sm" disabled>
+                            <button type="button" class="w-full sm:w-auto px-4 py-3 bg-gray-400 text-white rounded-lg text-sm font-medium" disabled>
                                 请先登录
                             </button>
                         {% endif %}
@@ -192,10 +220,10 @@
             <!-- 可滚动的想法列表 -->
             <div class="flex-1 overflow-y-auto space-y-2 pb-4">
                 {% for thought in recent_thoughts %}
-                <div class="bg-white rounded-lg p-3 border border-gray-200 hover:border-blue-300 hover:shadow-sm transition-all duration-200 cursor-pointer"
+                <div class="bg-white rounded-lg p-4 sm:p-4 border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-200 cursor-pointer touch-manipulation active:scale-[0.98]"
                      onclick="window.location.href='{{ url_for('main.thoughts') }}'">
-                    <div class="flex items-center mb-2">
-                        <span class="px-1.5 py-0.5 text-xs font-medium rounded-full {% if thought.thought_type == 'note' %}bg-blue-100 text-blue-800
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-3 gap-2">
+                        <span class="px-2 py-1 text-xs font-medium rounded-full {% if thought.thought_type == 'note' %}bg-blue-100 text-blue-800
                         {% elif thought.thought_type == 'quote' %}bg-green-100 text-green-800
                         {% elif thought.thought_type == 'idea' %}bg-purple-100 text-purple-800
                         {% elif thought.thought_type == 'task' %}bg-orange-100 text-orange-800
@@ -206,12 +234,12 @@
                             {% elif thought.thought_type == 'task' %}任务
                             {% endif %}
                         </span>
-                        <span class="text-xs text-gray-500 ml-2">
+                        <span class="text-xs text-gray-500 sm:ml-2 font-medium">
                             {{ thought.timestamp.strftime('%m-%d %H:%M') }}
                         </span>
                     </div>
 
-                    <div class="text-sm text-gray-700 line-clamp-3 leading-relaxed">
+                    <div class="text-sm text-gray-700 line-clamp-3 leading-relaxed mb-3">
                         {% if thought.content_html %}
                             {{ thought.content_html|safe }}
                         {% else %}
@@ -220,12 +248,12 @@
                     </div>
 
                     {% if thought.tags %}
-                    <div class="flex flex-wrap gap-1 mt-2">
+                    <div class="flex flex-wrap gap-1">
                         {% for tag in thought.tags.split(',')[:2] %}
                         {% if tag.strip() %}
                         <a href="{{ url_for('main.thoughts_by_tag', tag=tag.strip()) }}"
                            onclick="event.stopPropagation()"
-                           class="inline-block px-1 py-0.5 text-xs bg-gray-100 text-gray-600 rounded hover:bg-gray-200">
+                           class="inline-block px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded-full hover:bg-gray-200 touch-manipulation transition-colors">
                             #{{ tag.strip() }}
                         </a>
                         {% endif %}
@@ -236,12 +264,13 @@
                 {% endfor %}
 
                 {% if not recent_thoughts %}
-                <div class="text-center py-6">
-                    <i class="fas fa-lightbulb text-3xl text-gray-300 mb-2"></i>
-                    <p class="text-gray-500 text-sm">还没有想法记录</p>
+                <div class="text-center py-8">
+                    <i class="fas fa-lightbulb text-4xl text-gray-300 mb-3"></i>
+                    <p class="text-gray-500 text-base mb-4">还没有想法记录</p>
                     {% if current_user.is_authenticated %}
-                    <a href="{{ url_for('main.thoughts') }}" class="text-blue-600 hover:text-blue-800 text-sm font-medium mt-2 inline-block">
-                        记录第一个想法 <i class="fas fa-plus ml-1"></i>
+                    <a href="{{ url_for('main.thoughts') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium touch-manipulation transition-colors">
+                        <i class="fas fa-plus mr-2"></i>
+                        记录第一个想法
                     </a>
                     {% endif %}
                 </div>
@@ -250,20 +279,169 @@
 
             <!-- 固定的底部区域 -->
             {% if recent_thoughts %}
-            <div class="sticky bottom-0 bg-gradient-to-br from-blue-50 to-indigo-50 -m-4 p-4 mt-3 pt-3 border-t border-blue-200 rounded-b-lg">
-                <a href="{{ url_for('main.thoughts') }}" class="text-blue-600 hover:text-blue-800 text-sm font-medium text-center block">
-                    查看所有想法 <i class="fas fa-arrow-right ml-1"></i>
+            <div class="sticky bottom-0 bg-gradient-to-br from-blue-50 to-indigo-50 -m-4 p-4 mt-4 pt-4 border-t border-blue-200 rounded-b-lg">
+                <a href="{{ url_for('main.thoughts') }}" class="text-blue-600 hover:text-blue-800 text-sm font-medium text-center block touch-manipulation py-2 hover:bg-blue-100 rounded-lg transition-colors">
+                    查看所有想法 <i class="fas fa-arrow-right ml-2"></i>
                 </a>
             </div>
             {% endif %}
         </div>
+        </div> <!-- 关闭桌面端侧边栏内容包装器 -->
     </div>
 </div>
 {% endblock %}
 {% block scripts %}
 {{ super() }}
 <script>
+// 初始化心情可视化
 document.addEventListener('DOMContentLoaded', function() {
+    // 初始化心情日历格子
+    const moodCells = document.querySelectorAll('[data-mood-day]');
+
+    moodCells.forEach(cell => {
+        try {
+            const dayData = JSON.parse(cell.dataset.moodDay);
+            if (dayData && dayData.moods && dayData.moods.length > 0) {
+                const container = cell.querySelector('.mood-visualization-container');
+                if (container) {
+                    window.moodViz.renderMoodDay(dayData, container);
+                }
+            }
+        } catch (error) {
+            console.error('Error parsing mood data:', error);
+        }
+    });
+});
+document.addEventListener('DOMContentLoaded', function() {
+    // 移动端侧边栏功能
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebarContainer = document.getElementById('sidebarContainer');
+    const mobileOverlay = document.getElementById('mobileOverlay');
+    const mobilePanel = document.getElementById('mobilePanel');
+    const closeMobilePanel = document.getElementById('closeMobilePanel');
+    const mobileSidebarContent = document.getElementById('mobileSidebarContent');
+    const desktopSidebarContent = sidebarContainer?.querySelector('.lg\\:block');
+
+    // 复制桌面端侧边栏内容到移动端
+    function copySidebarContentToMobile() {
+        if (desktopSidebarContent && mobileSidebarContent) {
+            const content = desktopSidebarContent.innerHTML;
+            mobileSidebarContent.innerHTML = content;
+        }
+    }
+
+    // 显示移动端侧边栏
+    function showMobileSidebar() {
+        if (mobileOverlay && mobilePanel) {
+            mobileOverlay.classList.remove('hidden');
+            mobilePanel.classList.remove('translate-x-full');
+            document.body.style.overflow = 'hidden'; // 防止背景滚动
+
+            // 更新按钮状态
+            if (sidebarToggle) {
+                sidebarToggle.innerHTML = '<i class="fas fa-times text-lg"></i><span class="ml-2 text-sm font-medium">关闭</span>';
+            }
+        }
+    }
+
+    // 隐藏移动端侧边栏
+    function hideMobileSidebar() {
+        if (mobileOverlay && mobilePanel) {
+            mobileOverlay.classList.add('hidden');
+            mobilePanel.classList.add('translate-x-full');
+            document.body.style.overflow = ''; // 恢复背景滚动
+
+            // 更新按钮状态
+            if (sidebarToggle) {
+                sidebarToggle.innerHTML = '<i class="fas fa-lightbulb text-lg"></i><span class="ml-2 text-sm font-medium">想法</span>';
+            }
+        }
+    }
+
+    // 初始化移动端侧边栏
+    function initMobileSidebar() {
+        copySidebarContentToMobile();
+
+        if (sidebarToggle) {
+            sidebarToggle.addEventListener('click', function() {
+                const isVisible = !mobileOverlay?.classList.contains('hidden');
+                if (isVisible) {
+                    hideMobileSidebar();
+                } else {
+                    showMobileSidebar();
+                }
+            });
+        }
+
+        // 点击遮罩层关闭
+        if (mobileOverlay) {
+            mobileOverlay.addEventListener('click', hideMobileSidebar);
+        }
+
+        // 点击关闭按钮
+        if (closeMobilePanel) {
+            closeMobilePanel.addEventListener('click', hideMobileSidebar);
+        }
+
+        // ESC键关闭
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                hideMobileSidebar();
+            }
+        });
+    }
+
+    // 桌面端侧边栏功能（大屏幕）
+    function initDesktopSidebar() {
+        if (!sidebarToggle || !sidebarContainer) return;
+
+        // 从localStorage读取用户偏好
+        const isSidebarOpen = localStorage.getItem('sidebarOpen') !== 'false';
+
+        // 初始化侧边栏状态
+        updateDesktopSidebarVisibility(isSidebarOpen);
+
+        // 切换按钮点击事件
+        sidebarToggle.addEventListener('click', function() {
+            const isOpen = !sidebarContainer.classList.contains('hidden');
+            updateDesktopSidebarVisibility(!isOpen);
+            localStorage.setItem('sidebarOpen', (!isOpen).toString());
+        });
+
+        function updateDesktopSidebarVisibility(isOpen) {
+            if (isOpen) {
+                sidebarContainer.classList.remove('hidden');
+                sidebarContainer.classList.add('block');
+            } else {
+                sidebarContainer.classList.add('hidden');
+                sidebarContainer.classList.remove('block');
+            }
+        }
+    }
+
+    // 根据屏幕尺寸初始化
+    if (window.innerWidth >= 1024) { // lg breakpoint
+        initDesktopSidebar();
+    } else {
+        initMobileSidebar();
+    }
+
+    // 监听屏幕尺寸变化
+    let resizeTimer;
+    window.addEventListener('resize', function() {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function() {
+            if (window.innerWidth >= 1024) {
+                // 切换到桌面模式，确保移动端侧边栏关闭
+                hideMobileSidebar();
+                initDesktopSidebar();
+            } else {
+                // 切换到移动模式
+                copySidebarContentToMobile();
+            }
+        }, 250);
+    });
+
     // 心情打卡功能
     const moodItems = document.querySelectorAll('.mood-item');
     const moodInput = document.getElementById('mood-input');

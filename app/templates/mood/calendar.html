@@ -71,9 +71,10 @@
                 {% if day <= days_in_month %}
                     <div class="aspect-square border rounded-lg overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-lg
                         {% if calendar_data.get(day) %}
-                            {% set mood = calendar_data[day] %}
-                            {% if mood.mood_type != 'custom' %}
-                                border-{{ mood.mood_type }}-300 bg-gradient-to-br {{ Mood.MOOD_CONFIG[mood.mood_type].color }}
+                            {% set day_data = calendar_data[day] %}
+                            {% set primary_mood = day_data.primary_mood %}
+                            {% if primary_mood and primary_mood.mood_type != 'custom' %}
+                                border-{{ primary_mood.mood_type }}-300 bg-gradient-to-br {{ Mood.MOOD_CONFIG[primary_mood.mood_type].color }}
                             {% else %}
                                 border-green-300 bg-gradient-to-br from-green-50 to-blue-50
                             {% endif %}
@@ -83,20 +84,21 @@
                         {% endif %}">
 
                         {% if calendar_data.get(day) %}
-                            {% set mood = calendar_data[day] %}
-                            <a href="{{ url_for('main.mood_by_date', date_str=mood.date.isoformat()) }}"
+                            {% set day_data = calendar_data[day] %}
+                            {% set primary_mood = day_data.primary_mood %}
+                            <a href="{{ url_for('main.mood_by_date', date_str=primary_mood.date) }}"
                                class="block h-full p-2 text-center hover:bg-white hover:bg-opacity-30 transition-colors">
                                 <div class="text-lg font-medium mb-1">{{ day }}</div>
                                 <div class="text-2xl">
-                                    {% if mood.mood_type != 'custom' %}
-                                        {{ Mood.MOOD_CONFIG[mood.mood_type].icon }}
+                                    {% if primary_mood and primary_mood.mood_type != 'custom' %}
+                                        {{ Mood.MOOD_CONFIG[primary_mood.mood_type].icon }}
                                     {% else %}
                                         💭
                                     {% endif %}
                                 </div>
-                                {% if mood.diary %}
-                                <div class="text-xs mt-1">
-                                    <i class="fas fa-pen text-gray-600"></i>
+                                {% if day_data.count > 1 %}
+                                <div class="text-xs mt-1 bg-purple-600 text-white rounded-full w-5 h-5 flex items-center justify-center mx-auto">
+                                    {{ day_data.count }}
                                 </div>
                                 {% endif %}
                             </a>

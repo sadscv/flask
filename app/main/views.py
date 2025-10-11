@@ -78,10 +78,39 @@ def index():
             .order_by(Mood.date.desc())\
             .all()
 
-        # 构建日历数据
+        # 构建日历数据 - 支持同一天多次记录
         calendar_data = {}
         for mood in moods:
-            calendar_data[mood.date.day] = mood
+            day = mood.date.day
+            if day not in calendar_data:
+                calendar_data[day] = []
+            calendar_data[day].append(mood)
+
+        # 为每天添加智能分析
+        from .mood_views import calculate_primary_mood
+        for day, day_moods in calendar_data.items():
+            primary_mood = calculate_primary_mood(day_moods)
+            calendar_data[day] = {
+                'moods': [{
+                    'id': m.id,
+                    'mood_type': m.mood_type,
+                    'custom_mood': m.custom_mood,
+                    'intensity': m.intensity,
+                    'diary': m.diary,
+                    'date': m.date.isoformat() if m.date else None,
+                    'timestamp': m.timestamp.isoformat() if m.timestamp else None
+                } for m in day_moods],
+                'primary_mood': {
+                    'id': primary_mood.id,
+                    'mood_type': primary_mood.mood_type,
+                    'custom_mood': primary_mood.custom_mood,
+                    'intensity': primary_mood.intensity,
+                    'date': primary_mood.date.isoformat() if primary_mood.date else None,
+                    'timestamp': primary_mood.timestamp.isoformat() if primary_mood.timestamp else None
+                } if primary_mood else None,
+                'count': len(day_moods),
+                'avg_intensity': sum(m.intensity for m in day_moods) / len(day_moods)
+            }
 
         # 预计算日期信息（避免模板中调用date函数）
         days_info = []

@@ -2,12 +2,12 @@
     {% for post in posts %}
     <article class="card">
         <div class="card-header">
-            <div class="flex items-start justify-between mb-3">
+            <div class="flex flex-col sm:flex-row sm:items-start justify-between mb-3 gap-3">
                 <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">
+                    <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">
                         {{ post.author.username[0].upper() }}
                     </div>
-                    <div>
+                    <div class="min-w-0 flex-1">
                         <a href="{{ url_for('.user', username=post.author.username) }}" class="font-semibold text-gray-900 hover:text-blue-600 transition-colors">
                             {{ post.author.username }}
                         </a>
@@ -20,7 +20,7 @@
                         </p>
                     </div>
                 </div>
-                <div class="flex items-center space-x-2">
+                <div class="flex items-center space-x-2 sm:space-x-3">
                     {% if post.edit_date %}
                     <span class="px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">
                         已编辑
@@ -30,32 +30,33 @@
             </div>
         </div>
 
-        <div class="card-body">
-            <div class="article-content">
+        <div class="card-body p-3 sm:p-4">
+            <div class="article-content text-sm sm:text-base">
                 {% if post.body_html %}
                     {{ post.body_html | safe }}
                 {% else %}
-                    <p class="card-text">{{ post.body }}</p>
+                    <p class="card-text leading-relaxed">{{ post.body }}</p>
                 {% endif %}
             </div>
         </div>
 
-        <div class="card-footer">
-            <div class="article-stats">
-                <div class="article-stat">
-                    <i class="fas fa-eye article-meta-icon"></i>
-                    <span>{{ post.views or 0 }}</span>
+        <div class="card-footer px-3 sm:px-4 py-3 sm:py-4">
+            <div class="article-stats flex flex-wrap gap-3 sm:gap-4">
+                <div class="article-stat flex items-center">
+                    <i class="fas fa-eye article-meta-icon text-gray-400"></i>
+                    <span class="text-xs sm:text-sm text-gray-600">{{ post.views or 0 }}</span>
                 </div>
-                <div class="article-stat">
-                    <i class="fas fa-comment article-meta-icon"></i>
-                    <span>{{ post.comments.count() if post.comments else 0 }}</span>
+                <div class="article-stat flex items-center">
+                    <i class="fas fa-comment article-meta-icon text-gray-400"></i>
+                    <span class="text-xs sm:text-sm text-gray-600">{{ post.comments.count() if post.comments else 0 }}</span>
                 </div>
             </div>
 
-            <div class="article-actions">
+            <div class="article-actions mt-3 sm:mt-4">
                 {% if current_user.is_anonymous %}
-                    <a href="{{ url_for('.post', id=post.id) }}" class="card-action primary">
-                        <i class="fas fa-book-open mr-1"></i>阅读全文
+                    <a href="{{ url_for('.post', id=post.id) }}" class="card-action primary w-full sm:w-auto px-3 sm:px-4 py-2">
+                        <i class="fas fa-book-open mr-1 sm:mr-2"></i>
+                        <span class="text-sm">阅读全文</span>
                     </a>
                 {% endif %}
 

@@ -82,6 +82,8 @@
     {{ moment.include_moment() }}
     <!-- 公共JavaScript库 -->
     <script src="{{ url_for('static', filename='js/common.js') }}"></script>
+    <!-- 心情可视化组件 -->
+    <script src="{{ url_for('static', filename='js/mood-visualization.js') }}"></script>
     <!-- 视觉增强功能 -->
     <script src="{{ url_for('static', filename='js/enhancements.js') }}"></script>
     {% endblock %}
