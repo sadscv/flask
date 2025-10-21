@@ -10,10 +10,10 @@
           </p>
           <div class="flex space-x-4">
             <a href="#" class="text-gray-400 hover:text-gray-600">
-              <GitHubIcon class="w-6 h-6" />
+              <span class="text-xl">🌐</span>
             </a>
             <a href="#" class="text-gray-400 hover:text-gray-600">
-              <TwitterIcon class="w-6 h-6" />
+              <span class="text-xl">🔗</span>
             </a>
           </div>
         </div>
@@ -89,5 +89,4 @@
 </template>
 
 <script setup>
-import { GitHubIcon, TwitterIcon } from '@heroicons/vue/24/outline'
 </script>

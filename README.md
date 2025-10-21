@@ -2,6 +2,22 @@
 
 一个功能丰富的Flask博客应用，集成了想法记录、心情追踪等现代化功能。
 
+## UI/UX Improvement Notes
+- Establish a clearer design system in `frontend/tailwind.config.js` by extending neutral palettes, adding a secondary accent, and defining font stacks so navigation (`frontend/src/App.vue:4`) and cards (`frontend/src/views/Home.vue:20`) share consistent tokens.
+- Refresh the global layout by replacing repetitive `bg-white` card blocks in the home feed (`frontend/src/views/Home.vue:42`, `frontend/src/views/Home.vue:257`) with glassmorphism or soft gradient surfaces, and introduce a 24/16/12 spacing rhythm for better hierarchy.
+- Tune typography and micro-interactions in `frontend/src/assets/css/main.css:14` so headings, body text, and hover/active states feel more premium across desktop and mobile experiences.
+- Rework the header in `frontend/src/App.vue:4` to include a logo lockup, a primary call-to-action, and a compact user capsule while preserving the scroll-safe background and blur elevation.
+- Add bespoke empty/error states (e.g., illustrations or friendly copy) in the thoughts and mood modules under `frontend/src/views` to give feedback moments more character.
+
+## Known Issues & TODOs
+- `frontend/src/main.js:23` imports `useUIStore` after runtime statements, breaking Vite/ESM parsing. Move the import to the top of the file.
+- `frontend/src/api/index.js:89` calls `useAuthStore()` but never imports it, so every 401 response raises a `ReferenceError`.
+- Frontend Auth API calls (`frontend/src/api/auth.js:15`, `frontend/src/api/auth.js:29`) expect `/api/auth/logout`, `/api/auth/change-password`, etc., yet only `/api/auth/login`, `/api/auth/register`, and `/api/auth/me` exist in `app/main/views.py:1310-1477`.
+- Several blog endpoints declared in `frontend/src/api/blog.js:30-87` (`/posts/search`, `/posts/user/<username>`, `/posts/categories`, etc.) have no matching Flask route, so those features currently fail.
+- `frontend/src/api/thoughts.js:15` assumes a `limit` query parameter, but `app/api_1_0/thoughts.py:14-68` ignores it and always paginates by `per_page`, causing the “recent thoughts” widget to fetch more data than intended.
+- `app/main/views.py:1310-1477` accepts any token shaped like `real_token_<user_id>_*`, allowing easy forgery because the random suffix is never validated or stored.
+- `app/main/views.py:1330-1352` silently rewrites the password hash for `finaltest@example.com`, leaving a hard-coded backdoor.
+
 ## 🚀 功能特性
 
 ### 📝 博客功能
@@ -141,26 +157,37 @@ flask/
 ## 📚 API文档
 
 ### 认证接口
-- `POST /auth/login` - 用户登录
-- `POST /auth/logout` - 用户登出
-- `POST /auth/register` - 用户注册
+- `POST /api/auth/login` - 用户登录（返回 `real_token_*` 样式的临时 token）
+- `POST /api/auth/register` - 用户注册
+- `GET /api/auth/me` - 根据 Authorization 头返回当前用户信息
+
+> ⚠️ 前端已实现但后端缺失的接口：`/api/auth/logout`, `/api/auth/change-password`, `/api/auth/forgot-password`, `/api/auth/reset-password`, `/api/auth/resend-verification`。
 
 ### 文章接口
-- `GET /api/v1.0/posts` - 获取文章列表
-- `GET /api/v1.0/posts/<id>` - 获取单篇文章
-- `POST /api/v1.0/posts` - 创建文章
-- `PUT /api/v1.0/posts/<id>` - 更新文章
-- `DELETE /api/v1.0/posts/<id>` - 删除文章
+- `GET /api/posts` - 获取文章列表
+- `GET /api/posts/<id>` - 获取单篇文章
+- `POST /api/posts` - 创建文章
+- `PUT /api/posts/<id>` - 更新文章
+- `DELETE /api/posts/<id>` - 删除文章
+
+> ⚠️ `/posts/search`, `/posts/user/<username>`, `/posts/categories`, `/posts/tags`, `/posts/recommended` 等前端调用目前无后端实现。
 
 ### 想法接口
-- `GET /thoughts` - 获取想法列表
-- `POST /thoughts` - 创建想法
-- `DELETE /thought/<id>/delete` - 删除想法
+- `GET /api/v1.0/thoughts` - 获取想法列表
+- `POST /api/v1.0/thoughts` - 创建想法
+- `PUT /api/v1.0/thoughts/<id>` - 更新想法
+- `DELETE /api/v1.0/thoughts/<id>` - 删除想法
+
+> ⚠️ `/api/v1.0/thoughts/batch-delete`, `/api/v1.0/thoughts/import`, `/api/v1.0/thoughts/export`, `/api/v1.0/thoughts/<id>/related` 等接口尚未在后端实现。
 
 ### 心情接口
-- `GET /mood` - 心情主页
-- `POST /mood` - 记录心情
-- `DELETE /mood/<id>/delete` - 删除心情记录
+- `GET /api/moods` - 获取心情列表（支持分页、日期筛选）
+- `GET /api/moods/today` - 获取当日心情
+- `POST /api/moods` - 记录心情
+- `PUT /api/moods/<id>` - 更新心情记录
+- `DELETE /api/moods/<id>` - 删除心情记录
+
+> ⚠️ `/mood/distribution`, `/mood/trend`, `/mood/templates` 等分析/模板相关接口尚未提供。
 
 ## 🔧 开发指南
 

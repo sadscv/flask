@@ -422,6 +422,47 @@ html {
     }
 }
 
+/* 富文本内容样式增强 */
+.prose {
+    color: #4b5563;
+    line-height: 1.6;
+}
+
+.prose p {
+    margin-bottom: 1rem;
+}
+
+.prose h1,
+.prose h2,
+.prose h3 {
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+}
+
+/* 富文本图片预占尺寸，防止图片加载后布局变化 */
+.prose img {
+    max-width: 100%;
+    height: auto;
+    aspect-ratio: 16/9;
+    object-fit: cover;
+    background-color: #f3f4f6;
+    display: block;
+}
+
+.prose img[src] {
+    aspect-ratio: auto;
+}
+
+/* 为富文本中的其他媒体元素也添加约束 */
+.prose video,
+.prose iframe {
+    max-width: 100%;
+    height: auto;
+    aspect-ratio: 16/9;
+    background-color: #000;
+}
+
 /* 深色模式支持 */
 @media (prefers-color-scheme: dark) {
     body {

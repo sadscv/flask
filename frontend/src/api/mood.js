@@ -3,42 +3,42 @@ import { request } from './index'
 export const moodApi = {
   // 获取今日心情
   getTodayMood: () => {
-    return request.get('/mood/today')
+    return request.get('/api/moods/today')
   },
 
   // 创建心情记录
   createMood: (moodData) => {
-    return request.post('/mood', moodData)
+    return request.post('/api/moods', moodData)
   },
 
   // 更新心情记录
   updateMood: (id, moodData) => {
-    return request.put(`/mood/${id}`, moodData)
+    return request.put(`/api/moods/${id}`, moodData)
   },
 
   // 删除心情记录
   deleteMood: (id) => {
-    return request.delete(`/mood/${id}`)
+    return request.delete(`/api/moods/${id}`)
   },
 
   // 获取心情历史
   getMoodHistory: (page = 1, limit = 30) => {
-    return request.get(`/mood/history?page=${page}&limit=${limit}`)
+    return request.get(`/api/moods?page=${page}&per_page=${limit}`)
   },
 
   // 获取心情统计
   getMoodStats: (period = 'week') => {
-    return request.get(`/mood/stats?period=${period}`)
+    return request.get(`/api/moods/stats?period=${period}`)
   },
 
   // 获取心情日历数据
   getMoodCalendar: (year, month) => {
-    return request.get(`/mood/calendar/${year}/${month}`)
+    return request.get(`/api/moods?start_date=${year}-${month}-01&end_date=${year}-${month}-31`)
   },
 
   // 获取特定日期的心情
   getMoodByDate: (date) => {
-    return request.get(`/mood/date/${date}`)
+    return request.get(`/api/moods?start_date=${date}&end_date=${date}`)
   },
 
   // 获取心情分布

@@ -3,11 +3,12 @@ import { useUIStore } from '../stores/ui'
 
 // 创建axios实例
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json'
-  }
+  },
+  withCredentials: true // 支持跨域cookie
 })
 
 // 获取token
@@ -77,6 +78,12 @@ api.interceptors.response.use(
 
       switch (status) {
         case 401:
+          // 如果是登录页面的认证失败，不自动跳转
+          if (window.location.pathname === '/login' ||
+              (error.config && error.config.url && error.config.url.includes('/auth/login'))) {
+            break
+          }
+
           // 未授权，清除token并跳转到登录页
           localStorage.removeItem('token')
           const authStore = useAuthStore()

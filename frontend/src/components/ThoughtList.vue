@@ -146,7 +146,7 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { useThoughtStore } from '../stores/thoughts'
+import { useThoughtsStore } from '../stores/thoughts'
 import { useUIStore } from '../stores/ui'
 import {
   LightBulbIcon,
@@ -160,7 +160,7 @@ import {
 } from '@heroicons/vue/24/outline'
 
 const router = useRouter()
-const thoughtStore = useThoughtStore()
+const thoughtStore = useThoughtsStore()
 const uiStore = useUIStore()
 
 // 状态管理

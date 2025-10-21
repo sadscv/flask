@@ -4,36 +4,68 @@
 
 /* 基础样式 */
 @layer base {
+  :root {
+    --surface-glass: rgba(255, 255, 255, 0.62);
+    --surface-border: rgba(148, 163, 184, 0.25);
+    --surface-hover: rgba(226, 232, 240, 0.45);
+    --text-primary: #1f2937;
+    --text-secondary: #475569;
+    --radius-base: 1.25rem;
+  }
+
   html {
     scroll-behavior: smooth;
+    /* Reserve scrollbar gutter to prevent layout jump when content height changes */
+    scrollbar-gutter: stable both-edges;
   }
 
   body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    line-height: 1.6;
-    color: #374151;
+    font-family: 'Inter', 'Source Sans Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.65;
+    color: var(--text-primary);
+    /* Always show vertical scrollbar so skeleton and loaded states share the same viewport width */
+    min-height: 100vh;
+    overflow-y: scroll;
+    @apply bg-neutral-50;
+    background-image: radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 45%), radial-gradient(circle at bottom right, rgba(59, 130, 246, 0.06), transparent 40%);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold text-slate-900 tracking-tight;
+  }
+
+  p {
+    @apply leading-relaxed text-neutral-600;
+  }
+
+  a {
+    @apply text-primary-600 transition-colors duration-200;
+  }
+
+  a:hover {
+    @apply text-primary-500;
   }
 
   /* 选中文本样式 */
   ::selection {
-    @apply bg-blue-100 text-blue-900;
+    @apply bg-primary-100 text-primary-800;
   }
 
   /* 滚动条样式 */
   ::-webkit-scrollbar {
-    @apply w-2;
+    @apply w-2.5;
   }
 
   ::-webkit-scrollbar-track {
-    @apply bg-gray-100;
+    @apply bg-neutral-100 rounded-full;
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-gray-300 rounded-full;
+    @apply bg-neutral-300 rounded-full;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-gray-400;
+    @apply bg-neutral-400;
   }
 }
 
@@ -41,37 +73,41 @@
 @layer components {
   /* 按钮样式 */
   .btn {
-    @apply px-4 py-2 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
   }
 
   .btn-primary {
-    @apply bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500;
+    @apply bg-primary-600 text-white shadow-soft hover:bg-primary-700 focus:ring-primary-200 focus:ring-offset-transparent;
   }
 
   .btn-secondary {
-    @apply bg-gray-200 text-gray-900 hover:bg-gray-300 focus:ring-gray-500;
+    @apply bg-white/70 text-neutral-700 border border-neutral-200 hover:bg-white hover:border-neutral-300 focus:ring-neutral-300;
   }
 
   .btn-danger {
-    @apply bg-red-600 text-white hover:bg-red-700 focus:ring-red-500;
+    @apply bg-gradient-to-r from-rose-500 to-rose-600 text-white hover:from-rose-600 hover:to-rose-700 focus:ring-rose-300;
   }
 
   /* 卡片样式 */
   .card {
-    @apply bg-white rounded-lg shadow-sm border border-gray-200 p-6;
+    @apply bg-white/70 backdrop-blur-md border border-white/50 rounded-xl shadow-soft p-6;
   }
 
   .card-hover {
-    @apply transition-all duration-200 hover:shadow-md hover:border-gray-300;
+    @apply transition-transform duration-200 hover:-translate-y-1 hover:shadow-elevated hover:border-white/70;
+  }
+
+  .card-section {
+    @apply rounded-2xl border border-white/40 bg-white/70 backdrop-blur-sm shadow-inner-glow p-4 sm:p-6;
   }
 
   /* 表单样式 */
   .form-input {
-    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200;
+    @apply w-full px-4 py-3 border border-neutral-200 rounded-xl bg-white/80 shadow-inner focus:ring-2 focus:ring-primary-200 focus:border-primary-400 transition-all duration-200 placeholder:text-neutral-400;
   }
 
   .form-label {
-    @apply block text-sm font-medium text-gray-700 mb-1;
+    @apply block text-xs uppercase tracking-[0.2em] text-neutral-500 mb-1 font-semibold;
   }
 
   /* Flash消息样式 */
@@ -146,25 +182,41 @@
 
   /* 心情相关样式 */
   .mood-card {
-    @apply transition-all duration-200 hover:scale-105 cursor-pointer;
+    @apply transition-all duration-200 hover:-translate-y-1 hover:shadow-elevated cursor-pointer;
   }
 
   .mood-selected {
-    @apply ring-2 ring-blue-500 bg-blue-50 border-blue-400;
+    @apply ring-2 ring-primary-400 bg-primary-50 border-primary-200;
   }
 
   /* 想法卡片 */
   .thought-card {
-    @apply bg-white rounded-lg border border-gray-200 p-4 transition-all duration-200 hover:border-blue-300 hover:shadow-md;
+    @apply bg-white/80 backdrop-blur-md border border-white/50 rounded-2xl p-4 transition-all duration-200 hover:border-primary-200 hover:shadow-elevated;
   }
 
   /* 博客文章样式 */
   .post-card {
-    @apply bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200;
+    @apply rounded-2xl border border-white/50 bg-white/80 backdrop-blur-md overflow-hidden shadow-soft transition-all duration-300 hover:-translate-y-1 hover:shadow-elevated;
   }
 
   .post-content {
     @apply prose prose-sm max-w-none;
+  }
+
+  .surface-glass {
+    @apply bg-white/85 border border-white/70 backdrop-blur-md shadow-soft rounded-2xl;
+  }
+
+  .surface-muted {
+    @apply bg-white/80 border border-neutral-100 shadow-inner-glow rounded-2xl;
+  }
+
+  .badge-pill {
+    @apply inline-flex items-center gap-1 rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium text-neutral-600;
+  }
+
+  .chip-muted {
+    @apply inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/70 border border-neutral-200 text-xs font-medium text-neutral-500;
   }
 }
 
@@ -185,5 +237,21 @@
 
   .safe-bottom {
     padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .section-title {
+    @apply text-lg font-semibold text-slate-900 tracking-tight;
+  }
+
+  .section-subtitle {
+    @apply text-sm text-neutral-500;
+  }
+
+  .glass-border {
+    @apply border border-white/60 backdrop-blur-md;
+  }
+
+  .soft-shadow {
+    @apply shadow-soft;
   }
 }

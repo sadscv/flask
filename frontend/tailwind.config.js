@@ -6,6 +6,19 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: [
+          '"Inter"',
+          '"Source Sans Pro"',
+          '-apple-system',
+          'BlinkMacSystemFont',
+          '"Segoe UI"',
+          'Roboto',
+          '"Helvetica Neue"',
+          'Arial',
+          'sans-serif'
+        ]
+      },
       colors: {
         primary: {
           50: '#eff6ff',
@@ -30,7 +43,47 @@ export default {
           700: '#374151',
           800: '#1f2937',
           900: '#111827',
-        }
+        },
+        accent: {
+          50: '#f5f8ff',
+          100: '#e7efff',
+          200: '#d3e1ff',
+          300: '#b0c9ff',
+          400: '#84a8ff',
+          500: '#5c86fb',
+          600: '#3763e6',
+          700: '#264bc5',
+          800: '#1f3d99',
+          900: '#1a3478',
+        },
+        neutral: {
+          50: '#f5f5f7',
+          100: '#ebecf0',
+          200: '#d7d9e0',
+          300: '#c2c6d0',
+          400: '#a9aebe',
+          500: '#8f95a6',
+          600: '#6f758c',
+          700: '#585c72',
+          800: '#414456',
+          900: '#292c3d',
+        },
+      },
+      boxShadow: {
+        'elevated': '0 20px 45px -20px rgba(17, 24, 39, 0.45)',
+        'soft': '0 10px 30px -15px rgba(15, 23, 42, 0.35)',
+        'inner-glow': 'inset 0 1px 0 rgba(255, 255, 255, 0.35)'
+      },
+      backdropBlur: {
+        xs: '2px',
+      },
+      backgroundImage: {
+        'glass-gradient': 'linear-gradient(140deg, rgba(255,255,255,0.85) 0%, rgba(249,250,251,0.55) 45%, rgba(236,233,255,0.35) 100%)',
+        'header-gradient': 'linear-gradient(120deg, rgba(15,23,42,0.92) 0%, rgba(30,64,175,0.88) 55%, rgba(109,40,217,0.85) 100%)'
+      },
+      borderRadius: {
+        'xl': '1.25rem',
+        '2xl': '1.75rem'
       },
       animation: {
         'fade-in': 'fadeIn 0.3s ease-out',

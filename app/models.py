@@ -35,7 +35,7 @@ class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), unique=True, index=True)
-    password_hash = db.Column(db.String(128))
+    password_hash = db.Column(db.String(255))
     email = db.Column(db.String(64), unique=True, index=True)
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
     posts = db.relationship('Post', backref='author', lazy='dynamic')
@@ -49,9 +49,8 @@ class User(UserMixin, db.Model):
 
 
     def generate_auth_token(self, expiration):
-        s = Serializer(current_app.config['SECRET_KEY'],
-                       expires_in=expiration)
-        return s.dump({'id' : self.id})
+        s = Serializer(current_app.config['SECRET_KEY'], expiration)
+        return s.dumps({'id' : self.id}).decode('utf-8')
 
     def to_json(self):
         json_user = {
@@ -68,7 +67,7 @@ class User(UserMixin, db.Model):
     def verify_auth_token(token):
         s = Serializer(current_app.config['SECRET_KEY'])
         try:
-            data = s.loads(token)
+            data = s.loads(token.encode('utf-8'))
         except:
             return None
         return User.query.get(data['id'])

@@ -3,27 +3,27 @@ import { request } from './index'
 export const blogApi = {
   // 获取文章列表
   getPosts: (page = 1, perPage = 10) => {
-    return request.get(`/posts?page=${page}&per_page=${perPage}`)
+    return request.get(`/api/posts?page=${page}&per_page=${perPage}`)
   },
 
   // 获取单篇文章
   getPost: (id) => {
-    return request.get(`/posts/${id}`)
+    return request.get(`/api/posts/${id}`)
   },
 
   // 创建文章
   createPost: (postData) => {
-    return request.post('/posts', postData)
+    return request.post('/api/posts', postData)
   },
 
   // 更新文章
   updatePost: (id, postData) => {
-    return request.put(`/posts/${id}`, postData)
+    return request.put(`/api/posts/${id}`, postData)
   },
 
   // 删除文章
   deletePost: (id) => {
-    return request.delete(`/posts/${id}`)
+    return request.delete(`/api/posts/${id}`)
   },
 
   // 搜索文章
@@ -56,16 +56,7 @@ export const blogApi = {
     return request.get(`/posts/tag/${tag}?page=${page}`)
   },
 
-  // 点赞文章
-  likePost: (id) => {
-    return request.post(`/posts/${id}/like`)
-  },
-
-  // 取消点赞
-  unlikePost: (id) => {
-    return request.delete(`/posts/${id}/like`)
-  },
-
+  
   // 获取文章评论
   getComments: (postId, page = 1) => {
     return request.get(`/posts/${postId}/comments?page=${page}`)
