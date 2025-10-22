@@ -333,24 +333,8 @@ def api_update_post(post_id):
     """更新文章API"""
     try:
         # 验证认证状态
-        auth_header = request.headers.get('Authorization')
-        if not auth_header or not auth_header.startswith('Bearer '):
-            return jsonify({
-                'success': False,
-                'message': '请先登录'
-            }), 401
-
-        token = auth_header.split(' ')[1]
-
-        # 验证token并获取用户
-        user = None
-        if token.startswith('real_token_'):
-            try:
-                token_parts = token.split('_')
-                user_id = int(token_parts[2])
-                user = User.query.get(user_id)
-            except (IndexError, ValueError):
-                pass
+        from app.services.token_service import verify_token_from_request
+        user = verify_token_from_request()
 
         if not user:
             return jsonify({
@@ -443,24 +427,8 @@ def api_delete_post(post_id):
     """删除文章API"""
     try:
         # 验证认证状态
-        auth_header = request.headers.get('Authorization')
-        if not auth_header or not auth_header.startswith('Bearer '):
-            return jsonify({
-                'success': False,
-                'message': '请先登录'
-            }), 401
-
-        token = auth_header.split(' ')[1]
-
-        # 验证token并获取用户
-        user = None
-        if token.startswith('real_token_'):
-            try:
-                token_parts = token.split('_')
-                user_id = int(token_parts[2])
-                user = User.query.get(user_id)
-            except (IndexError, ValueError):
-                pass
+        from app.services.token_service import verify_token_from_request
+        user = verify_token_from_request()
 
         if not user:
             return jsonify({
@@ -505,24 +473,8 @@ def api_create_post():
     """创建文章API"""
     try:
         # 验证认证状态
-        auth_header = request.headers.get('Authorization')
-        if not auth_header or not auth_header.startswith('Bearer '):
-            return jsonify({
-                'success': False,
-                'message': '请先登录'
-            }), 401
-
-        token = auth_header.split(' ')[1]
-
-        # 验证token并获取用户
-        user = None
-        if token.startswith('real_token_'):
-            try:
-                token_parts = token.split('_')
-                user_id = int(token_parts[2])
-                user = User.query.get(user_id)
-            except (IndexError, ValueError):
-                pass
+        from app.services.token_service import verify_token_from_request
+        user = verify_token_from_request()
 
         if not user:
             return jsonify({
@@ -670,24 +622,8 @@ def api_create_thought():
     """创建想法API"""
     try:
         # 验证认证状态
-        auth_header = request.headers.get('Authorization')
-        if not auth_header or not auth_header.startswith('Bearer '):
-            return jsonify({
-                'success': False,
-                'message': '请先登录'
-            }), 401
-
-        token = auth_header.split(' ')[1]
-
-        # 验证token并获取用户
-        user = None
-        if token.startswith('real_token_'):
-            try:
-                token_parts = token.split('_')
-                user_id = int(token_parts[2])
-                user = User.query.get(user_id)
-            except (IndexError, ValueError):
-                pass
+        from app.services.token_service import verify_token_from_request
+        user = verify_token_from_request()
 
         if not user:
             return jsonify({
@@ -768,24 +704,8 @@ def api_delete_thought(thought_id):
     """删除想法API"""
     try:
         # 验证认证状态
-        auth_header = request.headers.get('Authorization')
-        if not auth_header or not auth_header.startswith('Bearer '):
-            return jsonify({
-                'success': False,
-                'message': '请先登录'
-            }), 401
-
-        token = auth_header.split(' ')[1]
-
-        # 验证token并获取用户
-        user = None
-        if token.startswith('real_token_'):
-            try:
-                token_parts = token.split('_')
-                user_id = int(token_parts[2])
-                user = User.query.get(user_id)
-            except (IndexError, ValueError):
-                pass
+        from app.services.token_service import verify_token_from_request
+        user = verify_token_from_request()
 
         if not user:
             return jsonify({
@@ -830,24 +750,8 @@ def api_moods():
     """获取心情列表API"""
     try:
         # 验证认证状态
-        auth_header = request.headers.get('Authorization')
-        if not auth_header or not auth_header.startswith('Bearer '):
-            return jsonify({
-                'success': False,
-                'message': '请先登录'
-            }), 401
-
-        token = auth_header.split(' ')[1]
-
-        # 验证token并获取用户
-        user = None
-        if token.startswith('real_token_'):
-            try:
-                token_parts = token.split('_')
-                user_id = int(token_parts[2])
-                user = User.query.get(user_id)
-            except (IndexError, ValueError):
-                pass
+        from app.services.token_service import verify_token_from_request
+        user = verify_token_from_request()
 
         if not user:
             return jsonify({
@@ -944,24 +848,8 @@ def api_today_mood():
     """获取今日心情API"""
     try:
         # 验证认证状态
-        auth_header = request.headers.get('Authorization')
-        if not auth_header or not auth_header.startswith('Bearer '):
-            return jsonify({
-                'success': False,
-                'message': '请先登录'
-            }), 401
-
-        token = auth_header.split(' ')[1]
-
-        # 验证token并获取用户
-        user = None
-        if token.startswith('real_token_'):
-            try:
-                token_parts = token.split('_')
-                user_id = int(token_parts[2])
-                user = User.query.get(user_id)
-            except (IndexError, ValueError):
-                pass
+        from app.services.token_service import verify_token_from_request
+        user = verify_token_from_request()
 
         if not user:
             return jsonify({
@@ -1007,24 +895,8 @@ def api_create_mood():
     """创建心情记录API"""
     try:
         # 验证认证状态
-        auth_header = request.headers.get('Authorization')
-        if not auth_header or not auth_header.startswith('Bearer '):
-            return jsonify({
-                'success': False,
-                'message': '请先登录'
-            }), 401
-
-        token = auth_header.split(' ')[1]
-
-        # 验证token并获取用户
-        user = None
-        if token.startswith('real_token_'):
-            try:
-                token_parts = token.split('_')
-                user_id = int(token_parts[2])
-                user = User.query.get(user_id)
-            except (IndexError, ValueError):
-                pass
+        from app.services.token_service import verify_token_from_request
+        user = verify_token_from_request()
 
         if not user:
             return jsonify({
@@ -1102,24 +974,8 @@ def api_update_mood(mood_id):
     """更新心情记录API"""
     try:
         # 验证认证状态
-        auth_header = request.headers.get('Authorization')
-        if not auth_header or not auth_header.startswith('Bearer '):
-            return jsonify({
-                'success': False,
-                'message': '请先登录'
-            }), 401
-
-        token = auth_header.split(' ')[1]
-
-        # 验证token并获取用户
-        user = None
-        if token.startswith('real_token_'):
-            try:
-                token_parts = token.split('_')
-                user_id = int(token_parts[2])
-                user = User.query.get(user_id)
-            except (IndexError, ValueError):
-                pass
+        from app.services.token_service import verify_token_from_request
+        user = verify_token_from_request()
 
         if not user:
             return jsonify({
@@ -1203,24 +1059,8 @@ def api_delete_mood(mood_id):
     """删除心情记录API"""
     try:
         # 验证认证状态
-        auth_header = request.headers.get('Authorization')
-        if not auth_header or not auth_header.startswith('Bearer '):
-            return jsonify({
-                'success': False,
-                'message': '请先登录'
-            }), 401
-
-        token = auth_header.split(' ')[1]
-
-        # 验证token并获取用户
-        user = None
-        if token.startswith('real_token_'):
-            try:
-                token_parts = token.split('_')
-                user_id = int(token_parts[2])
-                user = User.query.get(user_id)
-            except (IndexError, ValueError):
-                pass
+        from app.services.token_service import verify_token_from_request
+        user = verify_token_from_request()
 
         if not user:
             return jsonify({
@@ -1264,24 +1104,8 @@ def api_mood_stats():
     """获取心情统计API"""
     try:
         # 验证认证状态
-        auth_header = request.headers.get('Authorization')
-        if not auth_header or not auth_header.startswith('Bearer '):
-            return jsonify({
-                'success': False,
-                'message': '请先登录'
-            }), 401
-
-        token = auth_header.split(' ')[1]
-
-        # 验证token并获取用户
-        user = None
-        if token.startswith('real_token_'):
-            try:
-                token_parts = token.split('_')
-                user_id = int(token_parts[2])
-                user = User.query.get(user_id)
-            except (IndexError, ValueError):
-                pass
+        from app.services.token_service import verify_token_from_request
+        user = verify_token_from_request()
 
         if not user:
             return jsonify({
@@ -1309,7 +1133,7 @@ def api_mood_stats():
 
 @main.route('/api/auth/login', methods=['POST'])
 def api_auth_login():
-    """用户登录API"""
+    """用户登录API - 安全版本"""
     try:
         data = request.get_json()
         if not data or not data.get('email') or not data.get('password'):
@@ -1326,35 +1150,13 @@ def api_auth_login():
                 'message': '邮箱或密码错误'
             }), 401
 
-        # 验证密码 - 直接使用werkzeug避免User.verify_password的问题
-        from werkzeug.security import check_password_hash
-        try:
-            is_valid = check_password_hash(user.password_hash, data['password'])
-            # 如果直接验证失败，尝试重新设置密码并验证
-            if not is_valid:
-                # 检查是否是已知的问题用户
-                if user.email == 'finaltest@example.com' and data['password'] == 'finalpass123':
-                    # 重新设置密码以确保哈希正确
-                    user.password = data['password']
-                    db.session.commit()
-                    # 重新验证
-                    is_valid = check_password_hash(user.password_hash, data['password'])
-        except Exception as e:
-            # 如果密码验证失败，尝试检查是否是截断的哈希
-            # 对于测试用户，提供一个备用验证方法
-            if user.email == 'finaltest@example.com' and data['password'] == 'finalpass123':
-                is_valid = True
-            else:
-                is_valid = False
-
-        # 临时修复：如果是特定测试用户且密码匹配，强制验证通过
-        if not is_valid and user.email == 'finaltest@example.com' and data['password'] == 'finalpass123':
-            is_valid = True
+        # 安全的密码验证
+        is_valid = user.verify_password(data['password'])
 
         if is_valid:
-            # 生成认证token - 使用简化的token生成方式
-            import secrets
-            token = f"real_token_{user.id}_{secrets.token_hex(16)}"
+            # 使用安全的JWT令牌
+            from app.services.token_service import TokenService
+            token = TokenService.generate_token(user)
 
             return jsonify({
                 'success': True,
@@ -1428,8 +1230,10 @@ def api_auth_register():
 
 @main.route('/api/auth/me', methods=['GET'])
 def api_auth_me():
-    """获取当前用户信息API"""
+    """获取当前用户信息API - 安全版本"""
     try:
+        from app.services.token_service import TokenService
+
         auth_header = request.headers.get('Authorization')
         if not auth_header or not auth_header.startswith('Bearer '):
             return jsonify({
@@ -1439,42 +1243,50 @@ def api_auth_me():
 
         token = auth_header.split(' ')[1]
 
-        # 检查是否是真实token
-        if token.startswith('real_token_'):
-            try:
-                # 解析真实token获取用户ID
-                token_parts = token.split('_')
-                user_id = int(token_parts[2])
-                user = User.query.get(user_id)
+        # 尝试使用安全令牌验证
+        user = TokenService.verify_token(token)
+        if user:
+            return jsonify({
+                'success': True,
+                'user': {
+                    'id': user.id,
+                    'username': user.username,
+                    'email': user.email,
+                    'name': user.name,
+                    'location': user.location,
+                    'about_me': user.about_me,
+                    'role': user.role.name if user.role else 'user'
+                }
+            })
 
-                if user:
+        # 检查是否为旧版令牌并提供迁移支持（仅用于过渡期）
+        from app.services.token_service import LegacyTokenMigrator
+        migrated_user = None
+        if LegacyTokenMigrator.is_legacy_token(token):
+            new_token = LegacyTokenMigrator.migrate_legacy_token(token)
+            if new_token:
+                migrated_user = TokenService.verify_token(new_token)
+                # 返回新令牌以供后续使用
+                if migrated_user:
                     return jsonify({
                         'success': True,
                         'user': {
-                            'id': user.id,
-                            'username': user.username,
-                            'email': user.email,
-                            'name': user.name,
-                            'location': user.location,
-                            'about_me': user.about_me,
-                            'role': user.role.name if user.role else 'user'
-                        }
+                            'id': migrated_user.id,
+                            'username': migrated_user.username,
+                            'email': migrated_user.email,
+                            'name': migrated_user.name,
+                            'location': migrated_user.location,
+                            'about_me': migrated_user.about_me,
+                            'role': migrated_user.role.name if migrated_user.role else 'user'
+                        },
+                        'new_token': new_token,  # 提示客户端更新令牌
+                        'message': '令牌已更新为安全版本，请保存新令牌'
                     })
-                else:
-                    return jsonify({
-                        'success': False,
-                        'message': '用户不存在'
-                    }), 401
-            except (IndexError, ValueError):
-                return jsonify({
-                    'success': False,
-                    'message': '无效的认证令牌'
-                }), 401
-        else:
-            return jsonify({
-                'success': False,
-                'message': '无效的认证令牌'
-            }), 401
+
+        return jsonify({
+            'success': False,
+            'message': '无效或已过期的认证令牌'
+        }), 401
     except Exception as e:
         return jsonify({
             'success': False,
@@ -1599,109 +1411,3 @@ def debug_reset_password():
         }), 500
 
 
-@main.route('/api/debug/mock-login', methods=['POST'])
-def debug_mock_login():
-    """调试端点 - 模拟登录成功"""
-    try:
-        data = request.get_json()
-        email = data.get('email')
-
-        user = User.query.filter_by(email=email).first()
-        if not user:
-            return jsonify({
-                'success': False,
-                'message': f'用户不存在: {email}'
-            })
-
-        # 创建简单的mock token（仅用于测试）
-        import secrets
-        mock_token = f"mock_token_{user.id}_{secrets.token_hex(16)}"
-
-        return jsonify({
-            'success': True,
-            'message': '模拟登录成功（仅用于测试）',
-            'token': mock_token,
-            'user': {
-                'id': user.id,
-                'username': user.username,
-                'email': user.email,
-                'role': user.role.name if user.role else 'user'
-            }
-        })
-    except Exception as e:
-        return jsonify({
-            'success': False,
-            'message': str(e)
-        }), 500
-
-
-@main.route('/api/debug/mock-auth/me', methods=['GET'])
-def debug_mock_auth_me():
-    """调试端点 - 模拟获取当前用户信息"""
-    try:
-        auth_header = request.headers.get('Authorization')
-        if not auth_header or not auth_header.startswith('Bearer '):
-            return jsonify({
-                'success': False,
-                'message': '缺少认证令牌'
-            }), 401
-
-        token = auth_header.split(' ')[1]
-
-        # 检查是否是mock token
-        if token.startswith('mock_token_'):
-            try:
-                # 解析mock token获取用户ID
-                token_parts = token.split('_')
-                user_id = int(token_parts[2])
-                user = User.query.get(user_id)
-
-                if user:
-                    return jsonify({
-                        'success': True,
-                        'user': {
-                            'id': user.id,
-                            'username': user.username,
-                            'email': user.email,
-                            'name': user.name,
-                            'location': user.location,
-                            'about_me': user.about_me,
-                            'role': user.role.name if user.role else 'user'
-                        }
-                    })
-                else:
-                    return jsonify({
-                        'success': False,
-                        'message': '用户不存在'
-                    }), 401
-            except (IndexError, ValueError):
-                return jsonify({
-                    'success': False,
-                    'message': '无效的mock token'
-                }), 401
-        else:
-            # 尝试使用真实的token验证
-            user = User.verify_auth_token(token)
-            if user:
-                return jsonify({
-                    'success': True,
-                    'user': {
-                        'id': user.id,
-                        'username': user.username,
-                        'email': user.email,
-                        'name': user.name,
-                        'location': user.location,
-                        'about_me': user.about_me,
-                        'role': user.role.name if user.role else 'user'
-                    }
-                })
-            else:
-                return jsonify({
-                    'success': False,
-                    'message': '无效的认证令牌'
-                }), 401
-    except Exception as e:
-        return jsonify({
-            'success': False,
-            'message': str(e)
-        }), 500

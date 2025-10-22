@@ -9,6 +9,7 @@ from app.models import Thought, User
 from . import api
 from .decorators import permission_required
 from app.models import Permission
+from app.services.token_service import verify_token_from_request
 
 
 @api.route('/thoughts', methods=['GET'])
@@ -108,10 +109,23 @@ def get_thought(id):
 
 
 @api.route('/thoughts', methods=['POST'])
-@login_required
-@permission_required(Permission.WRITE_THOUGHTS)
 def create_thought():
-    """创建想法"""
+    """创建想法 - 使用JWT认证"""
+    # 使用JWT认证替代Flask-Login
+    user = verify_token_from_request()
+    if not user:
+        return jsonify({
+            'success': False,
+            'message': '无效或已过期的认证令牌'
+        }), 401
+
+    # 检查用户权限
+    if not user.can(Permission.WRITE_THOUGHTS):
+        return jsonify({
+            'success': False,
+            'message': '没有创建想法的权限'
+        }), 403
+
     data = request.get_json() or {}
 
     # 验证必填字段
@@ -120,7 +134,7 @@ def create_thought():
 
     thought = Thought(
         content=data['content'],
-        author=current_user._get_current_object(),
+        author=user,
         thought_type=data.get('thought_type', 'note'),
         tags=data.get('tags', ''),
         source_url=data.get('source_url', ''),
@@ -147,13 +161,20 @@ def create_thought():
 
 
 @api.route('/thoughts/<int:id>', methods=['PUT'])
-@login_required
 def update_thought(id):
-    """更新想法"""
+    """更新想法 - 使用JWT认证"""
+    # 使用JWT认证替代Flask-Login
+    user = verify_token_from_request()
+    if not user:
+        return jsonify({
+            'success': False,
+            'message': '无效或已过期的认证令牌'
+        }), 401
+
     thought = Thought.query.get_or_404(id)
 
     # 检查权限
-    if thought.author_id != current_user.id:
+    if thought.author_id != user.id:
         return jsonify({'success': False, 'message': '无权编辑此想法'}), 403
 
     data = request.get_json() or {}
@@ -188,13 +209,20 @@ def update_thought(id):
 
 
 @api.route('/thoughts/<int:id>', methods=['DELETE'])
-@login_required
 def delete_thought(id):
-    """删除想法（软删除）"""
+    """删除想法（软删除）- 使用JWT认证"""
+    # 使用JWT认证替代Flask-Login
+    user = verify_token_from_request()
+    if not user:
+        return jsonify({
+            'success': False,
+            'message': '无效或已过期的认证令牌'
+        }), 401
+
     thought = Thought.query.get_or_404(id)
 
     # 检查权限
-    if thought.author_id != current_user.id:
+    if thought.author_id != user.id:
         return jsonify({'success': False, 'message': '无权删除此想法'}), 403
 
     thought.is_deleted = True
@@ -372,13 +400,20 @@ def get_user_thoughts(username):
 
 
 @api.route('/thoughts/<int:id>/toggle-public', methods=['POST'])
-@login_required
 def toggle_thought_public(id):
-    """切换想法的公开状态"""
+    """切换想法的公开状态 - 使用JWT认证"""
+    # 使用JWT认证替代Flask-Login
+    user = verify_token_from_request()
+    if not user:
+        return jsonify({
+            'success': False,
+            'message': '无效或已过期的认证令牌'
+        }), 401
+
     thought = Thought.query.get_or_404(id)
 
     # 检查权限
-    if thought.author_id != current_user.id:
+    if thought.author_id != user.id:
         return jsonify({'success': False, 'message': '无权修改此想法'}), 403
 
     thought.is_public = not thought.is_public

@@ -33,6 +33,10 @@ def create_app(config_name):
     db.init_app(app)
     login_manager.init_app(app)
 
+    # 配置JWT安全令牌服务
+    from .services.token_service import configure_jwt
+    configure_jwt(app)
+
     from .api_1_0 import api as api_1_0_blueprint
     from .main import main as main_blueprint
     from .auth import auth as auth_blueprint

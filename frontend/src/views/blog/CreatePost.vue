@@ -104,33 +104,50 @@
             </div>
 
             <!-- 编辑器 -->
-            <div class="border border-gray-300 rounded-lg overflow-hidden">
-              <!-- 可视化编辑器 -->
-              <textarea
-                v-if="editMode === 'wysiwyg'"
-                v-model="form.body"
-                rows="20"
-                required
-                class="w-full px-3 py-2 border-0 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                placeholder="请输入文章内容，支持HTML格式..."
-                :disabled="submitting"
-              ></textarea>
+            <template v-if="editMode === 'wysiwyg'">
+              <div class="border border-gray-300 rounded-lg overflow-hidden">
+                <!-- 可视化编辑器 -->
+                <textarea
+                  v-model="form.body"
+                  rows="20"
+                  required
+                  class="w-full px-3 py-2 border-0 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                  placeholder="请输入文章内容，支持HTML格式..."
+                  :disabled="submitting"
+                ></textarea>
+              </div>
+            </template>
 
-              <!-- Markdown编辑器 -->
-              <textarea
-                v-else-if="editMode === 'markdown'"
-                v-model="form.body"
-                rows="20"
-                required
-                class="w-full px-3 py-2 border-0 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none font-mono text-sm"
-                placeholder="请输入Markdown格式的内容..."
-                :disabled="submitting"
-              ></textarea>
+            <template v-else-if="editMode === 'markdown'">
+              <div class="border border-gray-300 rounded-lg overflow-hidden flex flex-col md:flex-row">
+                <div class="md:w-1/2 bg-white">
+                  <!-- Markdown编辑器 -->
+                  <textarea
+                    v-model="form.body"
+                    rows="20"
+                    required
+                    class="w-full h-full min-h-[320px] px-3 py-2 border-0 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none font-mono text-sm"
+                    placeholder="请输入Markdown格式的内容..."
+                    :disabled="submitting"
+                  ></textarea>
+                </div>
+                <div class="md:w-1/2 border-t border-gray-200 md:border-t-0 md:border-l bg-gray-50">
+                  <!-- 实时预览 -->
+                  <div
+                    class="prose prose-sm sm:prose lg:prose-lg max-w-none px-4 py-4 min-h-[320px] overflow-y-auto"
+                    v-html="previewHtml"
+                  ></div>
+                </div>
+              </div>
+            </template>
 
+            <div
+              v-else
+              class="border border-gray-300 rounded-lg overflow-hidden bg-gray-50"
+            >
               <!-- 预览模式 -->
               <div
-                v-else-if="editMode === 'preview'"
-                class="p-4 min-h-[200px] prose prose-lg max-w-none"
+                class="p-4 min-h-[320px] prose prose-lg max-w-none"
                 v-html="previewHtml"
               ></div>
             </div>

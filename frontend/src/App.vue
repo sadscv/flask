@@ -7,10 +7,13 @@
           <div class="flex items-center gap-6">
             <router-link to="/" class="flex items-center gap-2 group">
               <div class="flex flex-col leading-tight">
-                <span class="text-base font-semibold text-slate-900 group-hover:text-primary-600 transition-colors">
-                  Sad Studio
-                </span>
-                <span class="text-[11px] uppercase tracking-[0.35em] text-neutral-500">ideas · moods · writing</span>
+                <div class="text-left">
+                  <span class="text-base font-semibold text-slate-900 group-hover:text-primary-600 transition-colors inline-block">
+                    Sad Studio
+                  </span>
+                  <br>
+                  <span class="text-[11px] uppercase tracking-[0.35em] text-neutral-500 inline-block">未竟之蓝</span>
+                </div>
               </div>
             </router-link>
             <div class="hidden lg:flex items-center gap-1">
